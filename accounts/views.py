@@ -47,8 +47,8 @@ def login(request):
         
         if user is not None:
             auth.login(request,user)
-            print('Login method')
-            return redirect('home')
+            messages.success(request,'Logged in Successfully')
+            return redirect('user_dashboard')
         else:
             messages.error(request,'Invalid Credetials')
             return redirect('login')
@@ -97,5 +97,9 @@ def verify_otp(request):
         else:
             return JsonResponse({'message': 'Invalid OTP'}, status=400)
     return render(request, 'verify_otp.html')
+
+@login_required(login_url = login)
+def user_dashboard(request):
+    return render(request,'accounts/user_dashboard.html')
 
 
