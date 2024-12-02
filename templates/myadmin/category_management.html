@@ -1,0 +1,32 @@
+{% extends "base_admin.html" %}
+{% load static %}
+{% block content %}
+
+<div class="main-content">
+    <div class="dashboard-header">
+        <h1 style="font-weight: bold">Category Management</h1>
+        <a href="{% url "add_category" %}" class="btn btn-primary" >Add Category</a>
+    </div>
+    <table class="table">
+        <thead class="thead-dark">
+          <tr>
+            <th scope="col">Category_id</th>
+            <th scope="col">Category Name</th>
+            <th scope="col">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for category in categories %}
+          <tr>
+            <td>{{category.id}}</td>
+            <td>{{category.category_name}}</td>
+            <td><a href="{% url "delete_category" category.id %}" class="btn btn-danger">Delete</a></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      
+      
+</div>
+
+{% endblock content %}

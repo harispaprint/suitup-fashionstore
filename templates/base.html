@@ -1,0 +1,145 @@
+{% load static %}
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="pragma" content="no-cache" />
+<meta http-equiv="cache-control" content="max-age=604800" />
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<title>SuitUp | One of the Biggest Online Shopping Platforms</title>
+
+<link href="{% static 'images/favicon.ico' %}" rel="shortcut icon" type="image/x-icon">
+
+<!-- Bootstrap4 files-->
+
+<link href="{% static 'css/bootstrap.css' %}" rel="stylesheet" type="text/css"/>
+
+<!-- Font awesome 5 -->
+<link href="{% static 'fonts/fontawesome/css/all.min.css' %}" type="text/css" rel="stylesheet">
+
+<!-- custom style -->
+<link href="{% static 'css/ui.css' %}" rel="stylesheet" type="text/css"/>
+<link href="{% static 'css/responsive.css' %}" rel="stylesheet" media="only screen and (max-width: 1200px)" />
+
+{% comment %} <style>
+	/* Add your custom styles here */
+	body {
+		background-color: #f4f4f4;
+	}
+	.navbar-brand {
+		font-weight: bold;
+	}
+	.profile-icon {
+		width: 30px;
+		height: 30px;
+		border-radius: 50%;
+		object-fit: cover;
+	}
+	.container-login {
+		max-width: 800px;
+		margin: 0 auto;
+		padding: 20px;
+	}
+	.bg-white {
+		background-color: white;
+		border-radius: 8px;
+		box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+	}
+	h2 {
+		margin-bottom: 20px;
+		font-weight: 700;
+	}
+	.btn-google, .btn-submit {
+		width: 100%;
+		padding: 10px;
+		margin-top: 15px;
+		font-size: 16px;
+		font-weight: 500;
+		border: none;
+		border-radius: 4px;
+		cursor: pointer;
+		color: white;
+	}
+	.btn-google img {
+		width: 20px;
+		margin-right: 10px;
+	}
+	.btn-google {
+		background-color: #3974c0;
+	}
+	.btn-google.github {
+		background-color: #942020;
+	}
+	.btn-submit {
+		background-color: #007BFF;
+	}
+	.form-control {
+		margin-bottom: 10px;
+		padding: 10px;
+		font-size: 16px;
+	}
+	.divider {
+		margin: 20px 0;
+		position: relative;
+		text-align: center;
+	}
+	.divider::before, .divider::after {
+		content: "";
+		height: 1px;
+		background-color: #ddd;
+		position: absolute;
+		width: 40%;
+		top: 50%;
+	}
+	.divider::before {
+		left: 0;
+	}
+	.divider::after {
+		right: 0;
+	}
+	.divider.text-muted {
+		font-size: 14px;
+		color: #666;
+		margin: 0 15px;
+		line-height: 1.5;
+	}
+	.text-dark {
+		color: #333;
+	}
+	.alert {
+		margin-top: 10px;
+	}
+	.profile-icon {
+		font-size: 32px;
+		width: 32px;
+		height: 32px;
+		vertical-align: middle;
+		margin-right: 5px;
+	} 
+</style> {% endcomment %}
+
+</head>
+<body>
+
+{% include "includes/navbar.html" %}
+
+{% block content %}
+<!-- Load the content -->
+{% endblock content %}
+
+{% include "includes/footer.html" %}
+
+</body>
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+{% comment %} <!-- jQuery -->
+<script src="{% static 'js/jquery-2.0.0.min.js' %}" type="text/javascript"></script> {% endcomment %}
+
+<script src="{% static 'js/bootstrap.bundle.min.js' %}" type="text/javascript"></script>
+
+<!-- custom javascript -->
+<script src="{% static 'js/script.js' %}" type="text/javascript"></script>
+
+</html>

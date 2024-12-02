@@ -1,0 +1,43 @@
+{% extends "base_admin.html" %}
+{% load static %}
+{% block content %}
+
+<div class="main-content">
+    <div class="dashboard-header">
+        <h1 style="font-weight: bold">Customer Management</h1>
+        <a href="{% url "add_category" %}">Add Customer</a>
+    </div>
+    <table class="table">
+        <thead class="thead-dark">
+          <tr>
+            <th scope="col">User_id</th>
+            <th scope="col">Email</th>
+            <th scope="col">Last Login</th>
+            <th scope="col">Status</th>
+            <th scope="col">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in users %}
+          <tr>
+            <td>{{user.id}}</td>
+            <td>{{user.email}}</td>
+            <td>{{user.last_login}}</td>
+            <td>{{user.status}}</td>
+            <td>
+            {% if user.is_active  %}
+            <a href="{% url "deactivate_user" user.id %}" class="btn btn-warning">Deactivate</a>
+            {% else %}
+            <a href="{% url "activate_user" user.id %}" class="btn btn-success">Activate</a>
+            {% endif %}
+            <a href="{% url "delete_user" user.id %}" class="btn btn-danger">Delete</a>
+          </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      
+      
+</div>
+
+{% endblock content %}
