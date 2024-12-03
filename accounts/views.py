@@ -11,6 +11,8 @@ from django.core.mail import send_mail
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.conf import settings
+from carts.utils import _cart_id
+from carts.models import Cart,CartItem
 
 
 def register(request):
@@ -46,6 +48,41 @@ def login(request):
         user = auth.authenticate(email=email,password=password)
         
         if user is not None:
+            try:
+                cart = Cart.objects.get(cart_id = _cart_id(request))
+                is_cart_item_exist = CartItem.objects.filter(cart=cart).exists()
+                
+                product_variation = []
+                if is_cart_item_exist:     
+                    cart_item = CartItem.objects.filter(cart=cart)
+                    for item in cart_item:
+                        product_variations_cart = item.variation.all()
+                        product_variation.append(list(product_variations_cart))
+                
+                cart_item = CartItem.objects.filter(user=user)
+                ex_var_list = []
+                id = []
+                for item in cart_item:
+                    existing_variation = item.variation.all()
+                    ex_var_list.append(list(existing_variation))
+                    id.append(item.id)
+
+                for pr_variation in product_variation:
+                    if pr_variation in ex_var_list:
+                        index = ex_var_list.index(pr_variation)
+                        item_id = id[index]
+                        item = CartItem.objects.get(id=item_id)
+                        item.quantity+=1
+                        item.user = user
+                        item.save()
+                    else:
+                        cart_items = CartItem.objects.filter(cart=cart)
+                        for item in cart_items:
+                            item.user=user
+                            item.save()
+ 
+            except:
+                pass    
             auth.login(request,user)
             messages.success(request,'Logged in Successfully')
             return redirect('user_dashboard')
