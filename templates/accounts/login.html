@@ -17,7 +17,7 @@
 
 <!-- Form Section -->
 <div class="container-login">
-  <div class="row align-items-center justify-content-center" style="height: 60vh;">
+  <div class="row align-items-center justify-content-center">
       <div class="col-lg-3"></div>
 
       <div class="col-lg-6"> 
@@ -52,12 +52,12 @@
                   Forgot your password? <a href="#">Reset</a>
               </p>
 
-              <form method="POST" action="{% url 'send_otp_email' %}">
+              {% comment %} <form method="POST" action="{% url 'send_otp_email' %}">
                 {% csrf_token %}
                 <label for="email">Enter your email:</label>
                 <input type="email" id="email" name="email" required>
                 <button type="submit">Send OTP</button>
-            </form>
+            </form> {% endcomment %}
             
           </div>
       </div>

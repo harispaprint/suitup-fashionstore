@@ -63,7 +63,7 @@
                         <div class="widget-header">
                             <small class="title text-muted">Welcome guest!</small>
                             <div> 
-                                <a href="{% url "login" %}">Sign in</a> <span class="dark-transp"> | </span>
+                                <a href="{% url 'login' %}?next={{ request.path }}">Sign in</a> <span class="dark-transp"> | </span>
                                 <a href="{% url "register" %}"> Register</a>
                             </div>
                         </div>

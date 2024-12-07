@@ -1,18 +1,15 @@
 
 from django.core.cache import cache
-from django.shortcuts import redirect, render,get_object_or_404
+from django.shortcuts import redirect, render
 from accounts.models import Account
-from store.models import Product
 from .forms import RegistrationForm
 from django.contrib import messages,auth
 from django.contrib.auth.decorators import login_required
-import random
-from django.core.mail import send_mail
 from django.shortcuts import render, redirect
-from django.http import JsonResponse
 from django.conf import settings
 from carts.utils import _cart_id
 from carts.models import Cart,CartItem
+import requests
 
 
 def register(request):
@@ -85,7 +82,19 @@ def login(request):
                 pass    
             auth.login(request,user)
             messages.success(request,'Logged in Successfully')
-            return redirect('user_dashboard')
+            
+            url = request.META.get('HTTP_REFERER')
+            try:
+                query = requests.utils.urlparse(url).query
+                params = dict(x.split('=') for x in query.split('&'))
+                if 'next' in params:
+                    nextpage = params['next']
+                return redirect(nextpage)
+            except:
+                pass
+                # next_url = request.GET.get('next', '/')
+                # return redirect(next_url)
+        
         else:
             messages.error(request,'Invalid Credetials')
             return redirect('login')
@@ -100,40 +109,6 @@ def logout(request):
 
 def success(request):
     return render(request,'success.html')
-
-def generate_otp():
-    """Generate a 6-digit OTP"""
-    return str(random.randint(100000, 999999))
-
-def send_otp_email(request):
-    if request.method == 'POST':
-        email = request.POST.get('email')
-        otp = generate_otp()
-
-        # Save OTP to session or database
-        request.session['email_otp'] = otp
-
-        # Send OTP email
-        subject = 'Your OTP Code'
-        message = f'Your One-Time Password (OTP) is: {otp}'
-        from_email = settings.EMAIL_HOST_USER
-        recipient_list = [email]
-
-        send_mail(subject, message, from_email, recipient_list)
-
-        return JsonResponse({'message': 'OTP sent successfully'})
-    return render(request, 'send_otp.html')
-
-def verify_otp(request):
-    if request.method == 'POST':
-        user_otp = request.POST.get('otp')
-        session_otp = request.session.get('email_otp')
-
-        if user_otp == session_otp:
-            return JsonResponse({'message': 'OTP verified successfully'})
-        else:
-            return JsonResponse({'message': 'Invalid OTP'}, status=400)
-    return render(request, 'verify_otp.html')
 
 @login_required(login_url = login)
 def user_dashboard(request):

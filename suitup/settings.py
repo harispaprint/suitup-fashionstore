@@ -42,12 +42,14 @@ INSTALLED_APPS = [
     'store',
     'carts',
     'myadmin',
+    'orders',
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
     'allauth.socialaccount.providers.github',
 ]
+
 # AUTHENTICATION_BACKENDS = [
     
 #     'allauth.account.auth_backends.AuthenticationBackend', 
