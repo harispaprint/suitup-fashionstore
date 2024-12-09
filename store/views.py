@@ -47,6 +47,7 @@ def product_detail(request,category_slug,product_slug):
 
 
 
+
 def delete_product(request,product_id):
     product = get_object_or_404(Product,id=product_id)
     product.delete()

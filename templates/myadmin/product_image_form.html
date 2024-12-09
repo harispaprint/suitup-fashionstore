@@ -1,22 +1,16 @@
-{% extends "base_admin.html" %}
-{% load static %}
+{% extends "base_admin.html" %} {% load static %} {% block content %}
 
-{% block content %}
-
-
-
-  <div class="container">
-    <article class="card-body">
-      {% include "includes/alerts.html" %}
-      <header class="mb-4"><h4 class="card-title">Add Product Images</h4></header>
-      <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <label for="additional_images">Additional Images:</label>
-        {{ image_form.image }}
-        <button type="submit" class="btn btn-primary">Add Image</button>
+<div class="container">
+  <article class="card-body">
+    {% include "includes/alerts.html" %}
+    <header class="mb-4"><h4 class="card-title">Add Product Images</h4></header>
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <label for="additional_images">Additional Images:</label>
+      {{ image_form.image }}
+      <button type="submit" class="btn btn-primary">Add Image</button>
     </form>
-    
-</article>
+  </article>
 
-{% endblock content %}
-
+  {% endblock content %}
+</div>

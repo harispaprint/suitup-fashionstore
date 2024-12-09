@@ -1,10 +1,11 @@
 from django.shortcuts import render,get_object_or_404,redirect
+from orders.models import OrderProduct
 from store.models import Product,ProductImage
 from accounts.models import Account
 from category.models import Category
 from django.contrib import auth,messages
 from django.contrib.auth.decorators import login_required
-from store.forms import AddProductForm,ProductImageForm
+from store.forms import AddProductForm, AddVariationForm,ProductImageForm
 from category.forms import AddCategoryForm
 from django.utils.text import slugify
 from .utils import admin_required
@@ -62,6 +63,22 @@ def category_management(request):
         'categories':categories
     }
     return render(request,'myadmin/category_management.html',context)
+
+@admin_required
+def order_management(request):
+    ordered_products = OrderProduct.objects.all()
+    context = {
+        'ordered_products': ordered_products
+    }
+    return render(request,'myadmin/order_management.html',context)
+
+@admin_required
+def inventory_management(request):
+    products = Product.objects.all()
+    context = {
+        'products':products
+    }
+    return render(request,'myadmin/inventory_management.html',context)
 
 
 @admin_required
@@ -124,6 +141,22 @@ def add_product_images(request,product_id):
     }
     return render(request,'myadmin/product_image_form.html',context)
 
+@admin_required
+def add_product_variation(request,product_id):
+    product = get_object_or_404(Product,id=product_id)
+    if request.method=='POST':
+        variation_form = AddVariationForm(request.POST)
+        if variation_form.is_valid():
+            variation = variation_form.save(commit=False)
+            variation.save()
+            messages.success(request, 'Variation added successfully!')
+            return redirect('product_management')
+    else:
+         variation_form = AddVariationForm()
+    context = {
+        'variation_form': variation_form,
+    }
+    return render(request,'myadmin/product_variation_form.html',context)
 
 @admin_required
 def edit_product(request,product_id):

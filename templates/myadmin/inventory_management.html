@@ -4,38 +4,43 @@
 
 <div class="main-content">
     <div class="dashboard-header">
-        <h1 style="font-weight: bold">Product Management</h1>
+        <h1 style="font-weight: bold">Inventory Management</h1>
         <a href="{% url "add_product" %}" class="btn btn-primary">Add Product</a>
     </div>
-    <table class="table text-center">
+    <table class="table">
         <thead class="thead-dark">
           <tr>
             <th scope="col">Product_id</th>
             <th scope="col">Product Name</th>
-            <th scope="col">Price</th>
+            <th scope="col">Color</th>
+            <th scope="col">Size</th>
+            <th scope="col">Stock</th>
             <th scope="col">Status</th>
             <th scope="col">Action</th>
           </tr>
         </thead>
         <tbody>
           {% for product in products %}
+          {% for variation in product.product_variation.all %}
           <tr>
             <td>{{product.id}}</td>
             <td>{{product.product_name}}</td>
-            <td>{{product.price}}</td>
+            <td>{{variation.variation_category}} : {{variation.variation_value}}</td>
             <td>{{product.stock}}</td>
+            <td>{{product.status}}</td>
+
             <td>
-            {% if product.is_available  %}
+            {% comment %} {% if product.is_available  %}
             <a href="{% url "deactivate_product" product.id %}" class="btn btn-warning">Deactivate</a>
             {% else %}
             <a href="{% url "activate_product" product.id %}" class="btn btn-success">Activate</a>
             {% endif %}
             <a href="{% url "edit_product" product.id %}" class="btn btn-primary">Edit</a>
-            <a href="{% url "add_product_variation" product.id %}" class="btn btn-primary">Add Variations</a>
             <a href="{% url "add_product_images" product.id %}" class="btn btn-primary">Add Images</a>
             <a href="{% url "delete_product" product.id %}" class="btn btn-danger">Delete</a>
-          </td> 
+          </td>  {% endcomment %}
           </tr>
+          {% endfor %}
           {% endfor %}
         </tbody>
       </table>

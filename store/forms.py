@@ -20,6 +20,34 @@ class AddProductForm(forms.ModelForm):
             'stock': forms.NumberInput(attrs={'class': 'form-control'}),
         }
 
+class AddVariationForm(forms.ModelForm):
+    product = forms.ModelChoiceField(
+        queryset=Product.objects.all(),  # Fetch all products
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        empty_label="Select Product"
+    )
+    
+    variation_category = forms.ChoiceField(
+        choices=Variation._meta.get_field('variation_category').choices,
+        widget=forms.Select(attrs={'class': 'form-control'}),
+    )
+
+    class Meta:
+        model = Variation
+        fields = ['product', 'variation_category', 'variation_value', 'is_active']
+        
+        widgets = {
+            'variation_value': forms.TextInput(attrs={'class': 'form-control'}),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+
+        labels = {
+            'product': 'Product',
+            'variation_category': 'Variation Category',
+            'variation_value': 'Variation Value',
+            'is_active': 'Active',
+        }
+
 class ProductImageForm(forms.ModelForm):
     class Meta:
         model = ProductImage
