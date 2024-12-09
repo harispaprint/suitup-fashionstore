@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import Account
+from .models import Account,UserProfile
 
 class AccountAdmin(UserAdmin):
     list_display = ('email','first_name','last_name','username','last_login','date_joined','is_active')
@@ -15,3 +15,5 @@ class AccountAdmin(UserAdmin):
 
 # Register your models here.
 admin.site.register(Account,AccountAdmin)
+admin.site.register(UserProfile)
+
