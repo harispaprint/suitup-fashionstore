@@ -1,5 +1,5 @@
 from django import forms
-from .models import Account, UserProfile
+from .models import Account, UserProfile,UserAddresses
 
 
 class RegistrationForm(forms.ModelForm):
@@ -53,5 +53,16 @@ class UserProfileForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(UserProfileForm, self).__init__(*args, **kwargs)
+        for field in self.fields:
+            self.fields[field].widget.attrs['class'] = 'form-control'
+
+class UserAddressForm(forms.ModelForm):
+   
+    class Meta:
+        model = UserAddresses
+        fields = ('first_name','last_name','address_line_1', 'address_line_2', 'city', 'state', 'country')
+
+    def __init__(self, *args, **kwargs):
+        super(UserAddressForm, self).__init__(*args, **kwargs)
         for field in self.fields:
             self.fields[field].widget.attrs['class'] = 'form-control'

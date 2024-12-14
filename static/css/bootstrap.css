@@ -2464,6 +2464,15 @@ fieldset:disabled a.btn {
 .btn-success:not(:disabled):not(.disabled):active:focus, .btn-success:not(:disabled):not(.disabled).active:focus, .show > .btn-success.dropdown-toggle:focus {
   box-shadow: 0 0 0 0.2rem rgba(38, 192, 58, 0.5);
 }
+.btn-light-green {
+  background-color: lightgreen;
+  color: white; /* Text color */
+  border-color: lightgreen; /* Optional, for border */
+}
+
+.btn-light-green:hover {
+  background-color: #90ee90; /* Slightly darker green for hover effect */
+}
 
 .btn-info {
   color: #fff;
@@ -10153,3 +10162,4 @@ h3 {
 }
 
 /*# sourceMappingURL=bootstrap.css.map */
+

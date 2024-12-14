@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<section class="section-conten padding-y bg">
+
+    {% include 'includes/alerts.html' %}
+    <div class="container">
+        <div class="row">
+            {% include 'includes/dashboard_sidebar.html' %}
+            <main class="col-md-6">
+              <a href="{% url "add_user_address" %}" class="btn btn-primary">Add Address</a>
+                <div class="row">
+                  
+                {% for address in saved_addresses  %}
+                    <div class="col-sm-6">
+                      <div class="card">
+                        <div class="card-body text-left">
+                          {% if address.is_default %}
+                          <p class="card-text mb-0"><i>Default address</i></p>
+                          <br>
+                          {% else %}
+                          <p></p>
+                          <br>
+                          {% endif %}
+                          <p class="card-text mb-0"><b>{{address.first_name}} {{address.last_name}}</b></p>
+                          <p class="card-text mb-0">{{address.address_line_1}}</p>
+                          <p class="card-text mb-0">{{address.address_line_2}}</p>
+                          <p class="card-text mb-0">{{address.city}} , {{address.state}}</p>
+                          <p class="card-text mb-0">{{address.country}}</p>
+                          <br>
+                          <a href="{% url "set_default_address" address.id %}" class="btn btn-primary">Set as default</a>
+                          <a href="{% url "edit_user_address" address.id %}" class="btn btn-primary">Edit</a>
+                        </div>
+                      </div>
+                    </div>
+                {% endfor %}
+                </div>
+        
+            </main>
+        </div> <!-- row.// -->
+    </div>
+</section>
+
+{% endblock %}

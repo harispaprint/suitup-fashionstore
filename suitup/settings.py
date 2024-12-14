@@ -50,10 +50,10 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.github',
 ]
 
-# AUTHENTICATION_BACKENDS = [
-    
-#     'allauth.account.auth_backends.AuthenticationBackend', 
-# ]
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend', 
+]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -98,6 +98,7 @@ except ImportError:
 
 
 SOCIALACCOUNT_LOGIN_ON_GET=True
+
 LOGIN_REDIRECT_URL = 'success'
 
 WSGI_APPLICATION = 'suitup.wsgi.application'
@@ -108,13 +109,23 @@ AUTH_USER_MODEL = 'accounts.Account'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'suitup',  # Replace with the name of your PostgreSQL database
+        'USER': 'postgres',  # Replace with your PostgreSQL username
+        'PASSWORD': 'kmea7034',   # Replace with your PostgreSQL password
+        'HOST': 'localhost',           # Set to 'localhost' or your database host address
+        'PORT': '5432',                # Default PostgreSQL port is 5432
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -140,7 +151,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Kolkata'
 
 USE_I18N = True
 
@@ -171,3 +182,10 @@ MESSAGE_TAGS = {
     messages.ERROR: 'danger',
 }
 
+#SMTP Configuration
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'harispaprint@gmail.com'
+EMAIL_HOST_PASSWORD = 'cgutvyprpsaclnes'
+EMAIL_USE_TLS = True

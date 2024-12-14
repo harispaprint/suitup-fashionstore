@@ -4,9 +4,9 @@ from category.models import Category
 
 class AddProductForm(forms.ModelForm):
     category = forms.ModelChoiceField(
-        queryset=Category.objects.all(),  # Fetch all categories from the database
-        widget=forms.Select(attrs={'class': 'form-control'}),  # Optional: Add CSS classes
-        empty_label="Select Category"  # Placeholder for the dropdown
+    queryset=Category.objects.all(),
+    widget=forms.Select(attrs={'class': 'form-control select2'}),
+    empty_label="Select Category"
     )
 
     class Meta:

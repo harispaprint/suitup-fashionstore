@@ -61,3 +61,29 @@ if (mainImage && zoomWindow) {
         zoomWindow.style.visibility = 'hidden';
     });
 }
+
+// $(document).ready(function() {
+//     // Initialize Select2 for the category dropdown
+//     $('.select2').select2({
+//         placeholder: "Select Category",  // Optional placeholder
+//         allowClear: true                // Optional clear button
+//     });
+// });
+
+// $('.select2').select2({
+//     placeholder: "Select Category",
+//     ajax: {
+//         url: '/api/categories/',  // Your API endpoint
+//         dataType: 'json',
+//         delay: 250,
+//         processResults: function (data) {
+//             return {
+//                 results: data.map(item => ({
+//                     id: item.id,
+//                     text: item.name
+//                 }))
+//             };
+//         },
+//     }
+// });
+

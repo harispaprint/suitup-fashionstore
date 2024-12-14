@@ -1668,3 +1668,7 @@ a[class*=card]:hover .title {
 .thumbnail:hover {
   border-color: #007bff;
 }
+
+.container_addresses {
+  display: flex;
+}

@@ -79,13 +79,30 @@ class UserProfile(models.Model):
     user = models.OneToOneField(Account, on_delete=models.CASCADE)
     address_line_1 = models.CharField(blank=True, max_length=100)
     address_line_2 = models.CharField(blank=True, max_length=100)
-    profile_picture = models.ImageField(blank=True, upload_to='userprofile')
+    profile_picture = models.ImageField(upload_to='userprofile',blank=True,null=True,default='userprofile/default.jpg')
     city = models.CharField(blank=True, max_length=20)
     state = models.CharField(blank=True, max_length=20)
     country = models.CharField(blank=True, max_length=20)
 
     def __str__(self):
         return self.user.first_name
+
+    def full_address(self):
+        return f'{self.address_line_1} {self.address_line_2}'
+    
+class UserAddresses(models.Model):
+    user = models.ForeignKey(Account,on_delete=models.CASCADE)
+    first_name = models.CharField(blank=True,max_length=100)
+    last_name = models.CharField(blank=True,max_length=100)
+    address_line_1 = models.CharField(blank=True, max_length=100)
+    address_line_2 = models.CharField(blank=True, max_length=100)
+    city = models.CharField(blank=True, max_length=20)
+    state = models.CharField(blank=True, max_length=20)
+    country = models.CharField(blank=True, max_length=20)
+    is_default = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.first_name
 
     def full_address(self):
         return f'{self.address_line_1} {self.address_line_2}'

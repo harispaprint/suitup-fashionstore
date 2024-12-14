@@ -48,7 +48,6 @@ def place_order(request,total=0,quantity=0):
             order.tax = tax
             order.ip = request.META.get('REMOTE_ADDR')
             order.save()  # Save the order to the database
-            print('saved order')
 
             # Generate order number
             yr = int(datetime.date.today().strftime('%Y'))
