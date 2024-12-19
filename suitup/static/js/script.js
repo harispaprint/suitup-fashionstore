@@ -62,6 +62,10 @@ if (mainImage && zoomWindow) {
     });
 }
 
+function confirmDelete() {
+    return confirm("Are you sure you want to delete this item?");
+}
+
 // $(document).ready(function() {
 //     // Initialize Select2 for the category dropdown
 //     $('.select2').select2({

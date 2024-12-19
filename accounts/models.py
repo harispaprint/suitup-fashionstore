@@ -77,12 +77,12 @@ class Account(AbstractBaseUser):
         
 class UserProfile(models.Model):
     user = models.OneToOneField(Account, on_delete=models.CASCADE)
-    address_line_1 = models.CharField(blank=True, max_length=100)
-    address_line_2 = models.CharField(blank=True, max_length=100)
+    address_line_1 = models.CharField(blank=True, max_length=100,default='')
+    address_line_2 = models.CharField(blank=True, max_length=100,default='')
     profile_picture = models.ImageField(upload_to='userprofile',blank=True,null=True,default='userprofile/default.jpg')
-    city = models.CharField(blank=True, max_length=20)
-    state = models.CharField(blank=True, max_length=20)
-    country = models.CharField(blank=True, max_length=20)
+    city = models.CharField(blank=True, max_length=20,default='')
+    state = models.CharField(blank=True, max_length=20,default='')
+    country = models.CharField(blank=True, max_length=20,default='')
 
     def __str__(self):
         return self.user.first_name
@@ -106,6 +106,9 @@ class UserAddresses(models.Model):
 
     def full_address(self):
         return f'{self.address_line_1} {self.address_line_2}'
+    
+    def full_name(self):
+        return f'{self.first_name} {self.last_name}'
         
 # class OTP(models.Model):
 #     email = models.EmailField()

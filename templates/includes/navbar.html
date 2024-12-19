@@ -61,10 +61,15 @@
                         {% if user.id is None %}
                         <div class="widget-header">
                             <small class="title text-muted">Welcome guest!</small>
-                            <div> 
-                                <a href="{% url 'login' %}?next={{ request.path }}">Sign in</a> <span class="dark-transp"> | </span>
-                                <a href="{% url "register" %}"> Register</a>
+                            <div>
+                                {% if request.path == '/accounts/register/' or request.path == '/accounts/login/' %}
+                                    <a href="{% url 'login' %}?next=/store/">Sign in</a> <span class="dark-transp"> | </span>
+                                {% else %}
+                                    <a href="{% url 'login' %}?next={{ request.path }}">Sign in</a> <span class="dark-transp"> | </span>
+                                {% endif %}
+                                <a href="{% url 'register' %}">Register</a>
                             </div>
+                            
                         </div>
                         {% else %}
                         <div class="widget-header">

@@ -10,32 +10,24 @@
     <table class="table">
         <thead class="thead-dark">
           <tr>
-            <th scope="col">Order_id</th>
-            <th scope="col">User id</th>
-            <th scope="col">Quantity</th>
-            <th scope="col">Status</th>
+            <th scope="col">Order #</th>
+            <th scope="col">Billing Name</th>
+            <th scope="col">Phone</th>
+            <th scope="col">Order Total</th>
+            <th scope="col">Date</th>
             <th scope="col">Action</th>
           </tr>
         </thead>
         <tbody>
-          {% for ordered_product in ordered_products %}
-          <tr>
-            <td>{{ordered_product.id}}</td>
-            <td>{{ordered_product.product.product_name}}</td>
-            <td>{{ordered_product.product_price}}</td>
-            <td>{{product.stock}}</td>
-            <td>
-            {% comment %} {% if product.is_available  %}
-            <a href="{% url "deactivate_product" product.id %}" class="btn btn-warning">Deactivate</a>
-            {% else %}
-            <a href="{% url "activate_product" product.id %}" class="btn btn-success">Activate</a>
-            {% endif %}
-            <a href="{% url "edit_product" product.id %}" class="btn btn-primary">Edit</a>
-            <a href="{% url "add_product_images" product.id %}" class="btn btn-primary">Add Images</a>
-            <a href="{% url "delete_product" product.id %}" class="btn btn-danger">Delete</a>
-          </td> 
-          </tr> {% endcomment %}
-          {% endfor %} 
+          {% for order in orders %}
+				    <tr>
+				      <th scope="row"><a href="" >{{order.order_number}}</a></th>
+				      <td>{{order.order_address.full_name}}</td>
+				      <td>{{order.phone}}</td>
+				      <td>${{order.order_total}}</td>
+					  <td>{{order.created_at}}</td>
+					  <td><a href="{% url "admin_cancel_order_page" order.id%}" class="btn btn-primary">Cancel Order</a></td>
+				{% endfor %}
         </tbody>
       </table>
       

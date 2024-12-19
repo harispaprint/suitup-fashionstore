@@ -28,14 +28,18 @@
 <link href="{% static 'css/responsive.css' %}" rel="stylesheet" media="only screen and (max-width: 1200px)" />
 
 </head>
-<body-admin>
+<body>
+    
+{% include "includes/alerts.html" %}
 
+<div class="row">
 {% include "includes/sidebar.html" %}
+
 
 {% block content %}
 <!-- Load the content -->
 {% endblock content %}
-
+</div>
 {% comment %} {% include "includes/footer.html" %} {% endcomment %}
 
 </body>

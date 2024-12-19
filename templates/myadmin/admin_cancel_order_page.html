@@ -1,0 +1,47 @@
+{% extends "base_admin.html" %}
+{% load static %}
+{% block content %}
+
+<div class="main-content">
+    <div class="dashboard-header">
+        <h1 style="font-weight: bold">Order Number : {{order}}</h1>
+
+		<form method="POST" action="{% url "admin_cancel_order" order.id %}" onsubmit="return confirm('Are you sure you want to delete this Order?');">
+			{% csrf_token %}
+			<button type="submit" class="btn btn-danger">Cancel</button>
+		</form>
+        
+    </div>
+    <table class="table">
+        <thead class="thead-dark">
+			<tr>
+				<th scope="col">Ordered products</th>
+				<th scope="col">Quantity</th>
+				<th scope="col">Price</th>
+				<th scope="col">Ordered Date,Time</th>
+				<th scope="col">Action</th>
+			  </tr>
+        </thead>
+        <tbody>
+			{% for ordered_product in ordered_products %}
+			<tr>
+			  <td>{{ordered_product.product}}</td>
+			  <td>{{ordered_product.quantity}}</td>
+			  <td>${{ordered_product.product_price}}</td>
+			  <td>{{ordered_product.created_at}}</td>
+			  {% comment %} <td><a href="{% url "admin_cancel_ordered_product" ordered_product.id%}" class="btn btn-primary">Cancel</a></td> {% endcomment %}
+			  <td>
+					<form method="POST" action="{% url "admin_cancel_ordered_product" ordered_product.id %}" onsubmit="return confirm('Are you sure you want to delete this Ordered item?');">
+					{% csrf_token %}
+					<button type="submit" class="btn btn-danger">Cancel</button>
+					</form>
+			 </td>
+
+		{% endfor %}
+        </tbody>
+      </table>
+      
+      
+</div>
+
+{% endblock content %}

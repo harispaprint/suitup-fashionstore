@@ -5,7 +5,6 @@
 
 <div class="container">
   <article class="card-body">
-    {% include "includes/alerts.html" %}
     <header class="mb-4"><h4 class="card-title">Add Category</h4></header>
     <form action="{% url "add_category" %}" method=POST> {% csrf_token %}
     <form method="post">

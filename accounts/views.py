@@ -72,15 +72,7 @@ def activate(request,uidb64,token):
         user.is_active=True
         user.save()
         messages.success(request,'Account successfully activated')
-        userprofile = UserProfile.objects.create(user=user)
-        user_form = UserForm(instance=user)
-        profile_form = UserProfileForm(instance=userprofile)
-        context = {
-            'user_form': user_form,
-            'profile_form': profile_form,
-            'userprofile': userprofile,
-        }
-        return render(request, 'accounts/edit_profile.html', context)
+        return redirect('login')
     else:
         messages.error(request,'Invalid activation link')
         return redirect('register')
@@ -145,65 +137,76 @@ def reset_password(request):
     else:
         return render(request, 'accounts/reset_password.html')
 
-
 def login(request):
     if request.method == 'POST':
         email = request.POST['email']
         password = request.POST['password']
-        user = auth.authenticate(email=email,password=password)
-        
+
+        user = auth.authenticate(email=email, password=password)
+
         if user is not None:
             try:
-                cart = Cart.objects.get(cart_id = _cart_id(request))
-                is_cart_item_exist = CartItem.objects.filter(cart=cart).exists()
-                
-                product_variation = []
-                if is_cart_item_exist:     
+                cart = Cart.objects.get(cart_id=_cart_id(request))
+                is_cart_item_exists = CartItem.objects.filter(cart=cart).exists()
+                if is_cart_item_exists:
                     cart_item = CartItem.objects.filter(cart=cart)
-                    for item in cart_item:
-                        product_variations_cart = item.variation.all()
-                        product_variation.append(list(product_variations_cart))
-                
-                cart_item = CartItem.objects.filter(user=user)
-                ex_var_list = []
-                id = []
-                for item in cart_item:
-                    existing_variation = item.variation.all()
-                    ex_var_list.append(list(existing_variation))
-                    id.append(item.id)
 
-                for pr_variation in product_variation:
-                    if pr_variation in ex_var_list:
-                        index = ex_var_list.index(pr_variation)
-                        item_id = id[index]
-                        item = CartItem.objects.get(id=item_id)
-                        item.quantity+=1
-                        item.user = user
-                        item.save()
-                    else:
-                        cart_items = CartItem.objects.filter(cart=cart)
-                        for item in cart_items:
-                            item.user=user
+                    # Getting the product variations by cart id
+                    product_variation = []
+                    for item in cart_item:
+                        variation = item.variations.all()
+                        product_variation.append(list(variation))
+
+                    # Get the cart items from the user to access his product variations
+                    cart_item = CartItem.objects.filter(user=user)
+                    ex_var_list = []
+                    id = []
+                    for item in cart_item:
+                        existing_variation = item.variations.all()
+                        ex_var_list.append(list(existing_variation))
+                        id.append(item.id)
+
+                    # product_variation = [1, 2, 3, 4, 6]
+                    # ex_var_list = [4, 6, 3, 5]
+
+                    for pr in product_variation:
+                        if pr in ex_var_list:
+                            index = ex_var_list.index(pr)
+                            item_id = id[index]
+                            item = CartItem.objects.get(id=item_id)
+                            item.quantity += 1
+                            item.user = user
                             item.save()
- 
+                        else:
+                            cart_item = CartItem.objects.filter(cart=cart)
+                            for item in cart_item:
+                                item.user = user
+                                item.save()
             except:
-                pass    
-            auth.login(request,user)
-            messages.success(request,'Logged in Successfully')
-            
+                pass
+            auth.login(request, user)
+            messages.success(request, 'You are now logged in.')
             url = request.META.get('HTTP_REFERER')
             try:
                 query = requests.utils.urlparse(url).query
+                # next=/cart/checkout/
                 params = dict(x.split('=') for x in query.split('&'))
                 if 'next' in params:
-                    nextpage = params['next']
-                return redirect(nextpage)
+                    nextPage = params['next']
+                    return redirect(nextPage)
             except:
-                pass
+                return redirect('user_dashboard')
         else:
-            messages.error(request,'Invalid Credetials')
+            messages.error(request, 'Invalid login credentials')
             return redirect('login')
-    return render(request,'accounts/login.html')
+    return render(request, 'accounts/login.html')
+
+
+@login_required(login_url = 'login')
+def logout(request):
+    auth.logout(request)
+    messages.success(request, 'You are logged out.')
+    return redirect('login')
 
 
 @login_required(login_url = login)
@@ -218,9 +221,12 @@ def success(request):
 @login_required(login_url = login)
 def user_dashboard(request):
     orders = Order.objects.order_by('-created_at').filter(user_id=request.user.id, is_ordered=True)
-    orders_count = orders.count()
-
-    userprofile = UserProfile.objects.get(user_id=request.user.id)
+    orders_count = orders.count() 
+    is_userprofile_exist = UserProfile.objects.filter(user=request.user).exists()
+    if is_userprofile_exist:
+         userprofile = UserProfile.objects.get(user_id=request.user.id)
+    else:
+        userprofile = UserProfile.objects.create(user=request.user)
     context = {
         'orders_count': orders_count,
         'userprofile': userprofile,
@@ -229,10 +235,10 @@ def user_dashboard(request):
 
 @login_required(login_url='login')
 def edit_profile(request):
-    
-    userprofile = get_object_or_404(UserProfile, user=request.user)
     if request.method == 'POST':
-            user_form = UserForm(request.POST, instance=request.user)
+            user = request.user
+            userprofile = UserProfile.objects.get(user=user)
+            user_form = UserForm(request.POST, instance=user)
             profile_form = UserProfileForm(request.POST, request.FILES, instance=userprofile)
             if user_form.is_valid() and profile_form.is_valid():
                 user_form.save()
@@ -240,6 +246,7 @@ def edit_profile(request):
                 messages.success(request, 'Your profile has been updated.')
                 return redirect('edit_profile')
     else:
+        userprofile = UserProfile.objects.get(user=request.user)
         user_form = UserForm(instance=request.user)
         profile_form = UserProfileForm(instance=userprofile)    
     context = {
@@ -264,8 +271,10 @@ def order_detail(request, order_id):
     order = Order.objects.get(order_number=order_id)
     subtotal = 0
     current_user = request.user
-    cart_user = order.user
-    if current_user is cart_user:
+    order_user = order.user
+    print(f"current_user : {current_user}")
+    print(f"order_user : {order_user}")
+    if request.user == order.user:
         for i in order_detail:
             subtotal += i.product_price * i.quantity
 
@@ -287,9 +296,12 @@ def saved_addresses(request):
     return render(request,'accounts/saved_addresses.html',context)
 
 def set_default_address(request,address_id):
-    current_default = UserAddresses.objects.get(is_default=True)
-    current_default.is_default=False
-    current_default.save()
+    try:
+        current_default = UserAddresses.objects.get(is_default=True)
+        current_default.is_default=False
+        current_default.save()
+    except:
+        pass
     new_default = UserAddresses.objects.get(id=address_id)
     new_default.is_default=True
     new_default.save()
@@ -304,7 +316,9 @@ def add_user_address(request):
             useraddress.user = request.user
             address_form.save()
             messages.success(request, 'New address added succefully.')
-            return redirect('saved_addresses')
+            # Dynamically determine the redirect target
+            next_page = request.GET.get('next', 'saved_addresses')
+            return redirect(next_page)
     else:
         address_form = UserAddressForm()
     form_heading="Add Address"
@@ -322,7 +336,8 @@ def edit_user_address(request,address_id):
         if address_form.is_valid():
             address_form.save()
             messages.success(request, 'Your address has been updated.')
-            return redirect('saved_addresses')
+            next_page = request.GET.get('next', 'saved_addresses')
+            return redirect(next_page)
     else:
         address_form = UserAddressForm(instance=useraddress)
     form_heading="Edit Address"

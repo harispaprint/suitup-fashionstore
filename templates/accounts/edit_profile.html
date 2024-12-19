@@ -4,8 +4,6 @@
 {% block content %}
 
 <section class="section-conten padding-y bg">
-
-{% include 'includes/alerts.html' %}
 <div class="container">
 	<div class="row">
 	{% include 'includes/dashboard_sidebar.html' %}
@@ -23,6 +21,7 @@
 			<div class="col-md-12 text-left">
 				<form action="{% url 'edit_profile' %}" method="POST" enctype="multipart/form-data">
 					{% csrf_token %}
+					<input type="hidden" id="{{userprofile.user}}" name="user" value="{{userprofile.user}}">
 					<div class="form-row">
 						<div class="form-group col-md-6">
 							<label>First Name</label>

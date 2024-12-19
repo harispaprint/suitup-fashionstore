@@ -1,13 +1,14 @@
 import datetime
 from django.shortcuts import render,redirect
+from accounts.models import UserAddresses
 from orders.models import Order, OrderProduct
 from store.models import Product,Variation
-from .forms import OrderForm
+# from .forms import OrderForm
 from carts.models import CartItem
 from django.contrib import messages
 
 # Create your views here.
-def place_order(request,total=0,quantity=0):
+def place_order(request,total=0,quantity=0,order=None):
     current_user = request.user
 
     cart_items = CartItem.objects.filter(user=current_user)
@@ -24,32 +25,19 @@ def place_order(request,total=0,quantity=0):
     tax = (2*total)/100
     grand_total = total + tax    
         
-    # return render(request,'orders/place_order.html')
-
     if request.method == 'POST':
-        print('Entered form')
-        form = OrderForm(request.POST)
-        if form.is_valid():
-            print('form is valid')
-            # Create an instance without saving to the database yet
+        selected_address_id = request.POST.get('address_id',None)
+        if selected_address_id:
+            selected_address = UserAddresses.objects.get(user=current_user,id=selected_address_id)
             order = Order()
             order.user = current_user
-            order.first_name = form.cleaned_data['first_name']
-            order.last_name = form.cleaned_data['last_name']
-            order.phone = form.cleaned_data['phone']
-            order.email = form.cleaned_data['email']
-            order.address_line_1 = form.cleaned_data['address_line_1']
-            order.address_line_2 = form.cleaned_data['address_line_2']
-            order.city = form.cleaned_data['city']
-            order.state = form.cleaned_data['state']
-            order.country = form.cleaned_data['country']
-            order.order_note = form.cleaned_data['order_note']
+            order.order_address=selected_address
             order.order_total = grand_total
             order.tax = tax
             order.ip = request.META.get('REMOTE_ADDR')
             order.save()  # Save the order to the database
 
-            # Generate order number
+    # Generate order number
             yr = int(datetime.date.today().strftime('%Y'))
             dt = int(datetime.date.today().strftime('%d'))
             mt = int(datetime.date.today().strftime('%m'))
@@ -57,22 +45,22 @@ def place_order(request,total=0,quantity=0):
             current_date = d.strftime("%Y%m%d") #20210305
             order_number = current_date + str(order.id)
             order.order_number = order_number
+            order.status = 'Completed'
             order.save()
 
-            context ={
-                'order' : order,
-                'total' : total,
-                'quantity' : quantity,
-                'cart_items' : cart_items,
-                'tax' : tax,
-                'grand_total' : grand_total,
-            }
+    context ={
+        'order' : order,
+        'total' : total,
+        'quantity' : quantity,
+        'cart_items' : cart_items,
+        'tax' : tax,
+        'grand_total' : grand_total,
+       
+    }
 
-            messages.success(request, f"Order placed successfully! Your order number is {order_number}.")
-            return render(request,'orders/payment.html',context)  # Replace 'store' with a success page if needed
-        else:
-            messages.error(request, "There was an error in your form. Please check the details.")
-      
+    messages.success(request, f"Order placed successfully! Your order number is {order_number}.")
+    return render(request,'orders/payment.html',context)  # Replace 'store' with a success page if needed        
+
     return redirect('store')
 
 def payment(request):
@@ -126,5 +114,28 @@ def payment(request):
     print(subtotal)
 
     return render(request,'orders/order_successful.html',context)
-    
 
+def cancel_order_page(request,order_id):
+    order =Order.objects.get(id=order_id)
+    ordered_products = OrderProduct.objects.filter(order=order)
+    context = {
+            'order': order,
+            'ordered_products': ordered_products,
+        }
+    return render(request,'orders/cancel_order_page.html',context)
+
+def cancel_order(request,order_id):
+    order = Order.objects.get(id=order_id)
+    order.delete()
+    return redirect('my_orders')
+
+def cancel_ordered_product(request,ordered_product_id):
+    ordered_product = OrderProduct.objects.get(id=ordered_product_id)
+    order = ordered_product.order
+    ordered_product.delete()
+    ordered_products = OrderProduct.objects.filter(order=order)
+    context = {
+            'order': order,
+            'ordered_products': ordered_products,
+        }
+    return render(request,'orders/cancel_order_page.html',context)

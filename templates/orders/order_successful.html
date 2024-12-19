@@ -33,10 +33,10 @@
                             <div class="invoice-from">
                                 <ul class="list-unstyled text-right">
                                     <li><strong>Invoiced To</strong></li>
-                                    <li>{{order.full_name}}</li>
-                                    <li>{{order.full_address}}</li>
-                                    <li>{{order.city}}, {{order.state}}</li>
-                                    <li>{{order.country}}</li>
+                                    <li>{{order.order_address.full_name}}</li>
+                                    <li>{{order.order_address.full_address}}</li>
+                                    <li>{{order.order_address.city}}, {{order.order_address.state}}</li>
+                                    <li>{{order.order_address.country}}</li>
                                 </ul>
                             </div>
                         </div>
@@ -46,10 +46,10 @@
                             <div class="invoice-details mt25">
                                 <div class="well">
                                     <ul class="list-unstyled mb0">
-                                        <li><strong>Order</strong> #{{order_number}}</li>
+                                        <li><strong>Order</strong> {{order.order_number}}</li>
                                         <li><strong>Transaction ID</strong> {{transID}}</li>
                                         <li><strong>Order Date:</strong> {{order.created_at}}</li>
-                                        <li><strong>Status:</strong> {{payment.status}}</li>
+                                        <li><strong>Status:</strong> {{order.status}}</li>
                                     </ul>
                                 </div>
                             </div>

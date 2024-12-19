@@ -1,7 +1,8 @@
 from django.contrib import messages
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from orders.forms import OrderForm
+from accounts.models import UserAddresses
+# from orders.forms import OrderForm
 from store.models import Product,Variation
 from carts.models import Cart, CartItem
 from django.contrib.auth.decorators import login_required
@@ -42,9 +43,13 @@ def add_cart(request, product_id):
                 index = ex_var_list.index(product_variation)
                 item_id = id[index]
                 item = CartItem.objects.get(product=product, id=item_id)
-                item.quantity += 1
-                item.save()
-
+                max_qty=item.product.stock//40
+                if item.quantity<max_qty:
+                    item.quantity += 1
+                    item.save()
+                else:
+                    messages.info(request,'Product max quantity exceeded!')
+                    return redirect(request.META.get('HTTP_REFERER', '/'))
             else:
                 item = CartItem.objects.create(product=product, quantity=1, user=current_user)
                 if len(product_variation) > 0:
@@ -77,11 +82,15 @@ def add_cart(request, product_id):
                 except:
                     pass
         try:
+            print('position 1')
             cart = Cart.objects.get(cart_id=_cart_id(request)) # get the cart using the cart_id present in the session
+            
         except Cart.DoesNotExist:
+            print('position 2')
             cart = Cart.objects.create(
                 cart_id = _cart_id(request)
             )
+           
         cart.save()
 
         is_cart_item_exists = CartItem.objects.filter(product=product, cart=cart).exists()
@@ -182,6 +191,7 @@ def remove_cart_item(request,product_id,cart_item_id):
 @login_required(login_url = login)
 def checkout(request,total=0,quantity=0,cart_items=None):
     current_user = request.user
+    user_addresses = UserAddresses.objects.filter(user=current_user)
     try:
         tax=0
         grand_total=0
@@ -202,6 +212,7 @@ def checkout(request,total=0,quantity=0,cart_items=None):
             'cart_items' : cart_items,
             'tax' : tax,
             'grand_total' : grand_total,
+            'user_addresses':user_addresses,
         }    
     return render(request,'store/checkout.html',context)
     

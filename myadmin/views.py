@@ -1,5 +1,6 @@
 from django.shortcuts import render,get_object_or_404,redirect
-from orders.models import OrderProduct
+from django.urls import reverse
+from orders.models import Order, OrderProduct
 from store.models import Product,ProductImage
 from accounts.models import Account
 from category.models import Category
@@ -66,11 +67,41 @@ def category_management(request):
 
 @admin_required
 def order_management(request):
-    ordered_products = OrderProduct.objects.all()
+    orders = Order.objects.all()
     context = {
-        'ordered_products': ordered_products
+        'orders': orders
     }
     return render(request,'myadmin/order_management.html',context)
+
+@admin_required
+def admin_cancel_order_page(request,order_id):
+    order =Order.objects.get(id=order_id)
+    ordered_products = OrderProduct.objects.filter(order=order)
+    context = {
+            'order': order,
+            'ordered_products': ordered_products,
+        }
+    return render(request,'myadmin/admin_cancel_order_page.html',context)
+
+@admin_required
+def admin_cancel_order(request,order_id):
+    order = Order.objects.get(id=order_id)
+    order.delete()
+    return redirect('order_management')
+
+@admin_required
+def admin_cancel_ordered_product(request,ordered_product_id):
+    ordered_product = OrderProduct.objects.get(id=ordered_product_id)
+    order = ordered_product.order
+    ordered_product.delete()
+    ordered_products = OrderProduct.objects.filter(order=order)
+    context = {
+            'order': order,
+            'ordered_products': ordered_products,
+        }
+    return render(request,'myadmin/admin_cancel_order_page.html',context)
+
+
 
 @admin_required
 def inventory_management(request):

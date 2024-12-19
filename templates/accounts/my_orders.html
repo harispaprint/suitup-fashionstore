@@ -25,18 +25,19 @@
 				      <th scope="col">Billing Name</th>
 				      <th scope="col">Phone</th>
 				      <th scope="col">Order Total</th>
-							<th scope="col">Date</th>
+					  <th scope="col">Date</th>
+					  <th scope="col">Action</th>
 				    </tr>
 				  </thead>
 				  <tbody>
 						{% for order in orders %}
 				    <tr>
-				      <th scope="row"><a href="{% url 'order_detail' order.order_number %}">{{order.order_number}}</a></th>
-				      <td>{{order.full_name}}</td>
+				      <th scope="row"><a href="{% url 'order_detail' order.order_number %}" >{{order.order_number}}</a></th>
+				      <td>{{order.order_address.full_name}}</td>
 				      <td>{{order.phone}}</td>
 				      <td>${{order.order_total}}</td>
-							<td>{{order.created_at}}</td>
-				    </tr>
+					  <td>{{order.created_at}}</td>
+					  <td><a href="{% url "cancel_order_page" order.id%}" class="btn btn-primary">Cancel Order</a></td>
 				{% endfor %}
 
 				  </tbody>
