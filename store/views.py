@@ -1,5 +1,6 @@
 from django.shortcuts import render,get_object_or_404,redirect
-from store.models import Product,ProductImage
+from store.utils import get_product_stock
+from store.models import Product,ProductImage, Variation
 from category.models import Category
 from .forms import AddProductForm
 from django.contrib import messages
@@ -7,6 +8,7 @@ from carts.models import Cart,CartItem
 from carts.views import _cart_id
 from django.http import HttpResponse
 from django.db.models import Q
+from django.http import JsonResponse
 
 # Create your views here.
 def store(request,category_slug=None):
@@ -28,23 +30,55 @@ def store(request,category_slug=None):
       }
     return render(request,'store/store.html',context)
 
-def product_detail(request,category_slug,product_slug):
-    try:
-        single_product = Product.objects.get(category__slug=category_slug,slug=product_slug)
-        additional_images = ProductImage.objects.filter(product=single_product)
-        in_cart = CartItem.objects.filter(cart__cart_id = _cart_id(request),product=single_product).exists()
+# def product_detail(request,category_slug,product_slug):
+#     try:
+#         single_product = Product.objects.get(category__slug=category_slug,slug=product_slug)
+#         additional_images = ProductImage.objects.filter(product=single_product)
+#         in_cart = CartItem.objects.filter(cart__cart_id = _cart_id(request),product=single_product).exists()
         
+#     except Exception as e:
+#         raise e
+    
+#     context = {
+#             'single_product':single_product,
+#             'additional_images':additional_images,
+#             'in_cart':in_cart
+#         }
+     
+#     return render(request,'store/product_detail.html',context)
+
+def product_detail(request, category_slug, product_slug):
+    try:
+        single_product = Product.objects.get(category__slug=category_slug, slug=product_slug)
+        additional_images = ProductImage.objects.filter(product=single_product)
+        in_cart = CartItem.objects.filter(cart__cart_id=_cart_id(request), product=single_product).exists()
+
+        # Fetch variations for the product
+        variations = Variation.objects.filter(product=single_product, is_active=True)
+
+        # Group variations by category
+        grouped_variations = {}
+        for variation in variations:
+            category = variation.variation_category.name  # Assuming you use VariationCategory as a foreign key
+            if category not in grouped_variations:
+                grouped_variations[category] = []
+            grouped_variations[category].append(variation.variation_value)
+
+    except Product.DoesNotExist:
+        # Handle product not found
+        return redirect('store')  # Redirect to a relevant page or show an error page
+    
     except Exception as e:
         raise e
-    
-    context = {
-            'single_product':single_product,
-            'additional_images':additional_images,
-            'in_cart':in_cart
-        }
-     
-    return render(request,'store/product_detail.html',context)
 
+    context = {
+        'single_product': single_product,
+        'additional_images': additional_images,
+        'in_cart': in_cart,
+        'grouped_variations': grouped_variations,  # Pass grouped variations to the template
+    }
+
+    return render(request, 'store/product_detail.html', context)
 
 
 
@@ -90,3 +124,32 @@ def search(request):
         'products_count': products_count  # Corrected the variable name
     }
     return render(request, 'store/store.html', context)
+
+def check_stock(request,product_id):
+    stock_count=0
+    stock_info = False
+    product_price=0
+    if request.method == "GET":
+        product = Product.objects.get(id=product_id)
+        variations = ", ".join([f"{key}: {str(request.GET.get(key))}" for key in request.GET])
+        search_key = f"{product.product_name}-{variations}"
+        try:
+            stock = get_product_stock(search_key)
+            print(stock)
+            stock_count = stock.product_stock
+            product_price = stock.price
+            stock_info = True
+        except:
+            stock_info = False
+
+
+        in_stock = stock_count > 0
+
+        response_data = {
+           "stock_status": f"<h5 class='{ 'text-success' if in_stock else 'text-info' if not stock_info else 'text-danger' }'>"
+                         f"{'In Stock (' + str(stock_count) + ' available)' if in_stock else 'Stock info not available' if not stock_info  else 'Out of Stock'}</h5>",
+           "can_add_to_cart": in_stock,
+           "product_price": f"${product_price}",
+           "stock_count": stock_count
+       }
+        return JsonResponse(response_data)

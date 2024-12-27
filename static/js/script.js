@@ -2,6 +2,48 @@
 
 // jQuery ready start
 $(document).ready(function () {
+    // Listen for changes in color or size
+    $('#color-select, #size-select').change(function () {
+        const color = $('#color-select').val();
+        const size = $('#size-select').val();
+    
+        // Only send AJAX if both values are selected
+        if (color && size) {
+        $.ajax({
+            url: checkStockUrl,
+            type: "GET",
+            data: {
+            color: color,
+            size: size,
+            },
+            success: function (response) {
+            // Update stock status
+            $('#stock-status').html(response.stock_status);
+    
+            // Update add-to-cart button
+            if (response.can_add_to_cart) {
+                $('#add-cart-button').html(`
+                <button type="submit" class="btn btn-primary">
+                    <span class="text">Add to cart</span>
+                    <i class="fas fa-shopping-cart"></i>
+                </button>
+                `);
+            } else {
+                $('#add-cart-button').html(`
+                <h5 class="text-danger">Out of Stock</h5>
+                `);
+            }
+            },
+            error: function (xhr, status, error) {
+            console.error("Error:", error);
+            },
+        });
+        }
+    });
+    });
+
+
+$(document).ready(function () {
     // Prevent closing dropdown on click inside
     $(document).on('click', '.dropdown-menu', function (e) {
         e.stopPropagation();
@@ -63,3 +105,6 @@ mainImage.addEventListener('mousemove', function(e) {
 mainImage.addEventListener('mouseleave', function() {
     zoomWindow.style.visibility = 'hidden';
 });
+
+
+

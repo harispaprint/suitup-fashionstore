@@ -27,32 +27,32 @@ class ProductImage(models.Model):
 
         def __str__(self):
             return f"Image for {self.product.product_name}"
-        
 
-    
-class VariationManager(models.Manager):
-    def colors(self):
-        return super(VariationManager, self).filter(variation_category='color', is_active=True)
 
-    def sizes(self):
-        return super(VariationManager, self).filter(variation_category='size', is_active=True)
+class VariationCategory(models.Model):
+    name = models.CharField(max_length=100, unique=True)
 
-variation_category_choice = (
-     ('color','color'),
-     ('size','size'),
-     )
+    def __str__(self):
+        return self.name
 
 class Variation(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    variation_category = models.CharField(max_length=100, choices=variation_category_choice)
-    variation_value     = models.CharField(max_length=100)
-    is_active           = models.BooleanField(default=True)
-    created_date        = models.DateTimeField(auto_now=True)
-
-    objects = VariationManager()
+    variation_category = models.ForeignKey(VariationCategory, on_delete=models.CASCADE)
+    variation_value = models.CharField(max_length=100)
+    is_active = models.BooleanField(default=True)
+    created_date = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.variation_value
+        return f"{self.variation_category.name}: {self.variation_value}"
 
 
-          
+class Stock(models.Model):
+    product = models.ForeignKey(Product,on_delete=models.CASCADE,related_name='stock_product',null=True)
+    variation_combo = models.ManyToManyField(Variation,related_name='product_variation_combo')
+    product_stock = models.IntegerField(default=0)
+    price = models.IntegerField(default=0)
+    search_key = models.CharField(max_length=255,null=True,blank=True)
+
+    def __str__(self):
+        variations = ", ".join([str(variation) for variation in self.variation_combo.all()])
+        return f"{self.product.product_name} - {variations}"

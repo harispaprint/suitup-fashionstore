@@ -1,5 +1,6 @@
 {% extends "base.html" %} 
-{% load static %} 
+{% load static %}
+{% load custom_filters %} 
 {% block content %}
 <section class="section-content padding-y bg">
   <div class="container">
@@ -44,51 +45,39 @@
           <!-- Text Section -->
           <div class="text-overlay">
             <h2 class="title">{{ single_product.product_name }}</h2>
-            <p class="description">{{ single_product.description }}</p>
-            <h4 class="price">${{ single_product.price }}</h4>
-            <p class="price">Stock left- {{ single_product.stock }}</p>
+            <div class="container">
+              <p class="text-justify">{{ single_product.description }}</p>
+            </div>
+          
+            <br>
+            <!-- Product price from Ajax -->
+            <div id="product-price"></div>
+
           </div>
           <hr />
+          
+
           <form action="{% url 'add_cart' single_product.id %}" method="POST">
             {% csrf_token %}
+            {% for variation_type, values in grouped_variations.items %}
             <div class="row">
-              <div class="item-option-select">
-                <h6>Choose Color</h6>
-                <select name="color" class="form-control" required>
-                  <option value="" disabled selected>Select</option>
-                  {% for i in single_product.variation_set.colors %}
-                  <option value="{{ i.variation_value | lower }}">{{ i.variation_value | capfirst }}</option>
-                  {% endfor %}
-                </select>
-              </div>
+                <div class="item-option-select">
+                    <h6>Choose {{ variation_type|capfirst }}</h6>
+                    <select name="{{ variation_type }}" id="{{ variation_type }}" class="form-control" required>
+                        <option value="" disabled selected>Select</option>
+                        {% for value in values %}
+                        <option value="{{ value|capfirst }}">{{ value|capfirst }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
             </div>
-            <div class="row">
-              <div class="item-option-select">
-                <h6>Select Size</h6>
-                <select name="size" class="form-control" required>
-                  <option value="" disabled selected>Select</option>
-                  {% for i in single_product.variation_set.sizes %}
-                  <option value="{{ i.variation_value | lower }}">{{ i.variation_value | capfirst }}</option>
-                  {% endfor %}
-                </select>
-              </div>
-            </div>
+            {% endfor %}
             <hr />
-            {% if single_product.stock <= 0 %}
-            <h5 class="text-danger">Out of Stock</h5>
-            {% elif in_cart %}
-            <h5 class="text-danger">Added to Cart</h5>
-            <button type="submit" class="btn btn-success">
-              <span class="text">Go to Cart</span>
-              <i class="fas fa-shopping-cart"></i>
-            </button>
-            {% else %}
-            <button type="submit" class="btn btn-primary">
-              <span class="text">Add to cart</span>
-              <i class="fas fa-shopping-cart"></i>
-            </button>
-            {% endif %}
-          </form>
+            <div id="stock-status"></div>
+
+            <div id="add-cart-button"></div>
+        </form>
+        
 
           <!-- Zoom Image -->
           <div class="zoom-container">
@@ -100,6 +89,8 @@
   </div>
 </section>
 
-<!-- CSS -->
+<script>
+  const checkStockUrl = "{% url 'check_stock' single_product.id %}";
+</script>
 
 {% endblock content %}
