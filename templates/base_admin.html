@@ -29,17 +29,25 @@
 
 </head>
 <body>
+    <div class="container-fluid">
+        <div class="row gx-1">
+            <div class="col-sm-12 col-md-2">
+                {% include "includes/sidebar.html" %}
+            </div>
+            <div class="col-sm-12 col-md-9 offset-1">
+                <div class="row">
+                    {% include "includes/alerts.html" %}
+                    {% include "includes/breadcrumbs.html" %}
+                </div>
+                <div class="row">
+                    {% block content %}
+                    <!-- Load the content -->
+                    {% endblock content %}
+                </div>
+            </div>
+        </div>
+    </div>
     
-{% include "includes/alerts.html" %}
-
-<div class="row">
-{% include "includes/sidebar.html" %}
-
-
-{% block content %}
-<!-- Load the content -->
-{% endblock content %}
-</div>
 {% comment %} {% include "includes/footer.html" %} {% endcomment %}
 
 </body>

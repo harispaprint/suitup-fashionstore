@@ -1,5 +1,5 @@
 from django import forms
-from .models import Product,ProductImage,Variation
+from .models import Product,ProductImage,Variation, VariationCategory,ReviewsRatings
 from category.models import Category
 
 class AddProductForm(forms.ModelForm):
@@ -21,32 +21,17 @@ class AddProductForm(forms.ModelForm):
         }
 
 class AddVariationForm(forms.ModelForm):
-    product = forms.ModelChoiceField(
-        queryset=Product.objects.all(),  # Fetch all products
-        widget=forms.Select(attrs={'class': 'form-control'}),
-        empty_label="Select Product"
-    )
-    
-    variation_category = forms.ChoiceField(
-        choices=Variation._meta.get_field('variation_category').choices,
-        widget=forms.Select(attrs={'class': 'form-control'}),
+ 
+    product = forms.CharField(widget=forms.TextInput(attrs={'readonly': 'readonly'}))
+    variation_category = forms.ModelChoiceField(
+        queryset=VariationCategory.objects.all(),  # Fetch all variation categories
+        empty_label="Select Variation Category"
     )
 
     class Meta:
         model = Variation
         fields = ['product', 'variation_category', 'variation_value', 'is_active']
         
-        widgets = {
-            'variation_value': forms.TextInput(attrs={'class': 'form-control'}),
-            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-        }
-
-        labels = {
-            'product': 'Product',
-            'variation_category': 'Variation Category',
-            'variation_value': 'Variation Value',
-            'is_active': 'Active',
-        }
 
 class ProductImageForm(forms.ModelForm):
     class Meta:
@@ -59,4 +44,9 @@ class ProductImageFormSet(forms.BaseInlineFormSet):
         images = [form.cleaned_data.get('image') for form in self.forms if form.cleaned_data and not form.cleaned_data.get('DELETE', False)]
         if len(images) < 3:
             raise forms.ValidationError("A product must have at least 3 images.")
+        
+class ReviewForm(forms.ModelForm):
+    class Meta:
+        model = ReviewsRatings
+        fields = ['review_subject','review_body','rating']
 

@@ -9,6 +9,8 @@ from django.contrib import messages
 
 # Create your views here.
 def place_order(request,total=0,quantity=0,order=None):
+    
+    
     current_user = request.user
 
     cart_items = CartItem.objects.filter(user=current_user)
@@ -20,7 +22,7 @@ def place_order(request,total=0,quantity=0,order=None):
     tax=0
     grand_total=0
     for cart_item in cart_items:
-        total += (cart_item.product.price*cart_item.quantity)
+        total += (cart_item.stock.price*cart_item.quantity)
         quantity += cart_item.quantity
     tax = (2*total)/100
     grand_total = total + tax    
@@ -75,7 +77,7 @@ def payment(request):
         order_product.user_id = current_user.id
         order_product.product_id = item.product_id
         order_product.quantity = item.quantity
-        order_product.product_price = item.product.price
+        order_product.product_price = item.stock.price
         order_product.ordered = True
         order_product.save()
 

@@ -101,6 +101,12 @@ class UserAddresses(models.Model):
     country = models.CharField(blank=True, max_length=20)
     is_default = models.BooleanField(default=False)
 
+    def save(self, *args, **kwargs):
+        # Check if there are any addresses for the user
+        if not UserAddresses.objects.filter(user=self.user).exists():
+            self.is_default = True  # Set as default if it's the first address
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.first_name
 

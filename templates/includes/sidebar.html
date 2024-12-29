@@ -2,7 +2,7 @@
 {% load static %}
 
       <!-- Sidebar -->
-      <nav class="col-sm-3 col-md-2 col-lg-2 bg-light sidebar py-4">
+<nav class="col-sm-3 col-md-2 col-lg-2 bg-light sidebar py-4 offset-md-1">
         <a href="{% url "home" %}" class="brand-wrap">
           <img class="logo" src="{% static "./images/suitup_logo.png" %}">
        </a> <!-- brand-wrap.// -->
@@ -12,19 +12,18 @@
             <img class="logo" src="{% static "./images/admin_icon.png" %}">
             <h4>Admin :  {{user.first_name}}</h4>
           </li>
-          <br><br>
           <li class="nav-item">
-            <a href="{% url "customer_management" %}" class="btn btn-info btn-block">Customer Management</a>
+            <a href="{% url "customer_management" %}" class="btn btn-primary btn-block">Customer Management</a>
           </li>
-          <br>
+
           <li class="nav-item">
             <a href="{% url "product_management" %}" class="btn btn-primary btn-block">Product Management</a>
           </li>
-          <br>
+
           <li class="nav-item">
             <a href="{% url "category_management" %}" class="btn btn-info btn-block">Category Management</a>
           </li>
-          <br>
+
           <li class="nav-item">
             <a href="{% url "order_management" %}" class="btn btn-info btn-block">Order Management</a>
           </li>
@@ -32,11 +31,12 @@
           <li class="nav-item">
             <a href="{% url "inventory_management" %}" class="btn btn-info btn-block">Inventory Management</a>
           </li>
-          <br><br><br>
+          <br><br>
           <li class="nav-item">
             <a href="{% url "admin_logout" %}" class="btn btn-primary btn-block">Logout</a>
           </li>
         </ul>
       </nav>
 
-    
+      <!-- Add a navbar with a toggle button -->
+<!-- Add this CSS in your stylesheet -->

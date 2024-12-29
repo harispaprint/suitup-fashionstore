@@ -1,14 +1,16 @@
 from django.shortcuts import render,get_object_or_404,redirect
-from store.utils import get_product_stock
-from store.models import Product,ProductImage, Variation
+from orders.models import OrderProduct
+from store.utils import get_product_stock, get_search_key
+from store.models import Product,ProductImage, ReviewsRatings, Variation
 from category.models import Category
-from .forms import AddProductForm
+from .forms import AddProductForm, ReviewForm
 from django.contrib import messages
 from carts.models import Cart,CartItem
 from carts.views import _cart_id
 from django.http import HttpResponse
 from django.db.models import Q
 from django.http import JsonResponse
+from django.core.paginator import Paginator
 
 # Create your views here.
 def store(request,category_slug=None):
@@ -24,8 +26,13 @@ def store(request,category_slug=None):
         products = Product.objects.all().filter(is_available=True).order_by(sort)
         products_count = products.count()
     
+    #Pagination logic
+    paginator = Paginator(products, 3)  # Show 6 products per page.
+    page_number = request.GET.get("page")
+    paged_products = paginator.get_page(page_number)
+    
     context = {
-       'products':products,
+       'products':paged_products,
        'products_count':products_count
       }
     return render(request,'store/store.html',context)
@@ -70,12 +77,25 @@ def product_detail(request, category_slug, product_slug):
     
     except Exception as e:
         raise e
+    
+    # if request.user.is_authenticated:
+    if request.user.is_authenticated:
+        try:
+            is_ordered_product = OrderProduct.objects.filter(user=request.user,product_id=single_product.id).exists()
+        except OrderProduct.DoesNotExist:
+            is_ordered_product = None
+    else:
+        is_ordered_product = None
+    
+    reviews = ReviewsRatings.objects.filter(product_id=single_product.id)
 
     context = {
         'single_product': single_product,
         'additional_images': additional_images,
         'in_cart': in_cart,
         'grouped_variations': grouped_variations,  # Pass grouped variations to the template
+        'is_ordered_product': is_ordered_product,
+        'reviews':reviews,
     }
 
     return render(request, 'store/product_detail.html', context)
@@ -130,9 +150,10 @@ def check_stock(request,product_id):
     stock_info = False
     product_price=0
     if request.method == "GET":
+        print(f" this is request.get {request.GET}")
         product = Product.objects.get(id=product_id)
         variations = ", ".join([f"{key}: {str(request.GET.get(key))}" for key in request.GET])
-        search_key = f"{product.product_name}-{variations}"
+        search_key = get_search_key(product,request)
         try:
             stock = get_product_stock(search_key)
             print(stock)
@@ -153,3 +174,25 @@ def check_stock(request,product_id):
            "stock_count": stock_count
        }
         return JsonResponse(response_data)
+    
+def review_submit(request,product_id):
+    url = request.META.get('HTTP_REFERER')
+    print(url)
+    try:
+        review = ReviewsRatings.objects.get(user__id=request.user.id,product__id=product_id)
+        review_form = ReviewForm(request.POST,instance=review)
+        review_form.save()
+        messages.success(request,'Thanks for your valauble review of the product, review updated')
+    except ReviewsRatings.DoesNotExist:
+        review_form = ReviewForm(request.POST)
+        if review_form.is_valid():
+            review_data = ReviewsRatings()
+            review_data.user_id = request.user.id
+            review_data.product_id = product_id
+            review_data.rating = review_form.cleaned_data['rating']
+            review_data.review_subject = review_form.cleaned_data['review_subject']
+            review_data.review_body = review_form.cleaned_data['review_body']
+            review_data.ip = request.META.get('REMOTE_ADDR')
+            review_data.save()
+            messages.success(request,'Thanks for your valauble review of the product')
+    return redirect(url)

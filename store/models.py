@@ -1,6 +1,8 @@
 from django.db import models
 from django.urls import reverse
+from accounts.models import Account
 from category.models import Category
+from django.db.models import Avg,Count
 
 # Create your models here.
 class Product(models.Model):
@@ -17,6 +19,20 @@ class Product(models.Model):
 
     def get_url(self):
         return reverse('product_detail',args=[self.category.slug,self.slug])
+    
+    def avg_rating(self):
+        ratings = ReviewsRatings.objects.filter(product=self,review_active=True).aggregate(average=Avg('rating'))
+        avg=0
+        if ratings['average'] is not None:
+            avg = float(ratings['average'])
+        return avg
+    
+    def count_reviews(self):
+        reviews = ReviewsRatings.objects.filter(product=self,review_active=True).aggregate(count=Count('id'))
+        count=0
+        if reviews['count'] is not None:
+            count = int(reviews['count'])
+        return count
 
     def __str__(self):
         return self.product_name
@@ -56,3 +72,17 @@ class Stock(models.Model):
     def __str__(self):
         variations = ", ".join([str(variation) for variation in self.variation_combo.all()])
         return f"{self.product.product_name} - {variations}"
+    
+class ReviewsRatings(models.Model):
+    product = models.ForeignKey(Product,on_delete=models.CASCADE)
+    user = models.ForeignKey(Account,on_delete=models.CASCADE)
+    review_subject = models.CharField(max_length=250)
+    review_body = models.TextField(null=True,blank=True)
+    rating = models.FloatField()
+    ip = models.CharField(max_length=30,blank=True)
+    review_active = models.BooleanField(default=True)
+    created_date = models.DateTimeField(auto_now_add=True)
+    updated_date = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.product.product_name} - {self.user.username}"

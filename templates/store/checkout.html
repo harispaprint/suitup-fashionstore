@@ -16,7 +16,7 @@
                    
                   <a href="{% url 'add_user_address' %}?next=checkout" class="btn btn-primary">Add Address</a>
                   <br>
-                    <form action="{% url "place_order" %}" method="POST">
+                    <form id="checkoutForm" action="{% url 'place_order' %}" method="POST">
                         {% csrf_token %}
                         {% for user_address in user_addresses  %}
                         <div class="row justify-content-between align-items-center">
@@ -64,9 +64,9 @@
                                         <figcaption class="info">
                                             <a href="{{ cart_item.product.get_url }}" class="title text-dark">{{ cart_item.product.product_name }}</a>
                                             <p class="text-muted small">
-                                                {% if cart_item.variation.all %}
-                                                    {% for item in cart_item.variation.all %}
-                                                        {{ item.variation_category | capfirst }} : {{ item.variation_value | capfirst }} <br>
+                                                {% if cart_item.variations.all %}
+                                                    {% for item_variation in cart_item.variations.all %}
+                                                        {{ item_variation.variation_category.name | capfirst }} : {{ item_variation.variation_value | capfirst }} <br>
                                                     {% endfor %}
                                                 {% endif %}
                                             </p>
@@ -80,7 +80,7 @@
                                 <td>
                                     <div class="price-wrap">
                                         <var class="price">$ {{ cart_item.sub_total }}</var>
-                                        <small class="text-muted"> $ {{ cart_item.product.price }} each </small>
+                                        <small class="text-muted"> $ {{ cart_item.stock.price }} each </small>
                                     </div> <!-- price-wrap .// -->
                                 </td>
             
@@ -93,9 +93,26 @@
             <div class="card-body">
                 
             <button type="submit" name="submit" class="btn btn-primary btn-block">Place Order</button>
-            <a href="{% url "store" %}" class="btn btn-light btn-block">Continue Shopping</a>
-                
             </form>
+
+            <script>
+                document.addEventListener("DOMContentLoaded", function () {
+                    const form = document.getElementById("checkoutForm");
+        
+                    form.addEventListener("submit", function (event) {
+                        const selectedAddress = document.querySelector("input[name='address_id']:checked");
+        
+                        if (!selectedAddress) {
+                            alert("Please select an address to proceed.");
+                            event.preventDefault(); // Prevent form submission
+                        }
+                    });
+                });
+            </script>
+
+
+            <br>
+            <a href="{% url "store" %}" class="btn btn-light btn-block">Continue Shopping</a>
             </div> <!-- card-body.// -->
             </div> <!-- card.// -->
         </aside> <!-- col.// -->
@@ -108,6 +125,8 @@
     </div> <!-- container .//  -->
     </section>
     <!-- ========================= SECTION CONTENT END// ========================= -->
+
+    
 
 {% endblock content %}
 

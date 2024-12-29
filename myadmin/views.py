@@ -183,7 +183,7 @@ def add_product_variation(request,product_id):
             messages.success(request, 'Variation added successfully!')
             return redirect('product_management')
     else:
-         variation_form = AddVariationForm()
+         variation_form = AddVariationForm(initial={'product': product})
     context = {
         'variation_form': variation_form,
     }

@@ -3,16 +3,35 @@
 {% load static %} 
 
 {% block content %}
-
 <div class="container">
   <article class="card-body">
-    <header class="mb-4"><h4 class="card-title">Add Product Variation</h4></header>
-    <form method="post" enctype="multipart/form-data">
-      {% csrf_token %}
-      {{ variation_form }}
-      <button type="submit" class="btn btn-primary">Add Variation</button>
-    </form>
-  </article>
+    <header class="mb-4">
+      <h4 class="card-title">Add Product Variation</h4>
+    </header>
 
-  {% endblock content %}
+    <div class="container mt-5">
+      <form method="post">
+          {% csrf_token %}
+          
+          <div class="form-group">
+              <label for="id_product">Product Name</label>
+              {{ variation_form.product }}
+          </div>
+          
+          <div class="form-group">
+              <label for="id_variation_category">Variation Category</label>
+              {{ variation_form.variation_category }}
+          </div>
+          
+          <div class="form-group">
+              <label for="id_variation_value">Variation Value</label>
+              {{ variation_form.variation_value }}
+          </div>
+          
+          <button type="submit" class="btn btn-primary btn-block">Submit</button>
+      </form>
+    </div>
+  </article>
 </div>
+{% endblock content %}
+

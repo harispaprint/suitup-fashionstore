@@ -1,9 +1,10 @@
 from django.contrib import messages
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from store.utils import get_search_key
 from accounts.models import UserAddresses
 # from orders.forms import OrderForm
-from store.models import Product,Variation
+from store.models import Product, Stock,Variation
 from carts.models import Cart, CartItem
 from django.contrib.auth.decorators import login_required
 from accounts.views import login
@@ -13,6 +14,10 @@ from .utils import _cart_id
 def add_cart(request, product_id):
     current_user = request.user
     product = Product.objects.get(id=product_id) #get the product
+    print(f" this is request.post from add cart {request.POST}")
+    search_key = get_search_key(product,request)
+    stock = Stock.objects.filter(search_key=search_key).first()
+
     # If the user is authenticated
     if current_user.is_authenticated:
         product_variation = []
@@ -22,7 +27,7 @@ def add_cart(request, product_id):
                 value = request.POST[key]
 
                 try:
-                    variation = Variation.objects.get(product=product, variation_category__iexact=key, variation_value__iexact=value)
+                    variation = Variation.objects.get(product=product, variation_category__name__iexact=key, variation_value__iexact=value)
                     product_variation.append(variation)
                 except:
                     pass
@@ -61,6 +66,7 @@ def add_cart(request, product_id):
                 product = product,
                 quantity = 1,
                 user = current_user,
+                stock=stock
             )
             if len(product_variation) > 0:
                 cart_item.variations.clear()
@@ -77,16 +83,14 @@ def add_cart(request, product_id):
                 value = request.POST[key]
 
                 try:
-                    variation = Variation.objects.get(product=product, variation_category__iexact=key, variation_value__iexact=value)
+                    variation = Variation.objects.get(product=product, variation_category__name__iexact=key, variation_value__iexact=value)
                     product_variation.append(variation)
                 except:
                     pass
         try:
-            print('position 1')
             cart = Cart.objects.get(cart_id=_cart_id(request)) # get the cart using the cart_id present in the session
             
         except Cart.DoesNotExist:
-            print('position 2')
             cart = Cart.objects.create(
                 cart_id = _cart_id(request)
             )
@@ -103,8 +107,6 @@ def add_cart(request, product_id):
                 existing_variation = item.variations.all()
                 ex_var_list.append(list(existing_variation))
                 id.append(item.id)
-
-            print(ex_var_list)
 
             if product_variation in ex_var_list:
                
@@ -124,6 +126,7 @@ def add_cart(request, product_id):
             cart_item = CartItem.objects.create(
                 product = product,
                 quantity = 1,
+                stock=stock,
                 cart = cart,
             )
             if len(product_variation) > 0:
@@ -144,7 +147,7 @@ def cart(request,total=0,quantity=0,cart_items=None):
             cart = Cart.objects.get(cart_id=_cart_id(request))
             cart_items = CartItem.objects.filter(cart=cart,is_active=True)
         for cart_item in cart_items:
-            total += (cart_item.product.price*cart_item.quantity)
+            total += (cart_item.stock.price*cart_item.quantity)
             quantity += cart_item.quantity
         tax = (2*total)/100
         grand_total = total + tax
@@ -198,7 +201,7 @@ def checkout(request,total=0,quantity=0,cart_items=None):
         # cart = Cart.objects.get(cart_id=_cart_id(request))
         cart_items = CartItem.objects.filter(user=current_user,is_active=True)
         for cart_item in cart_items:
-            total += (cart_item.product.price*cart_item.quantity)
+            total += (cart_item.stock.price*cart_item.quantity)
             quantity += cart_item.quantity
         tax = (2*total)/100
         grand_total = total + tax
