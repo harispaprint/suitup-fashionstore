@@ -13,13 +13,14 @@
     {% else %}
     <div class="row">
         <aside class="col-lg-9">
-            <div class="card">
+            <div class="card p-0">
                 <table class="table table-borderless table-shopping-cart">
                 <thead class="text-muted">
                     <tr class="small text-uppercase">
                         <th scope="col">Product</th>
                         <th scope="col" width="120">Quantity</th>
-                        <th scope="col" width="120">Price</th>
+                        <th scope="col" width="100">Price</th>
+                        <th scope="col" width="100">Discount</th>
                         <th scope="col" class="text-right" width="200"> </th>
                     </tr>
                 </thead>
@@ -32,8 +33,8 @@
                             <figcaption class="info">
                                 <a href="#" class="title text-dark">{{cart_item.product.product_name}}</a>
                                 <p class="text-muted small">
-                                    {% if cart_item.variations.all %}
-                                        {% for item in cart_item.variations.all %}
+                                    {% if cart_item.stock.variation_combo.all %}
+                                        {% for item in cart_item.stock.variation_combo.all %}
                                         {{item.variation_category | capfirst}} : {{item.variation_value | capfirst}} <br>
                                         {% endfor %}
                                     {% endif %}
@@ -52,8 +53,8 @@
                                 <div class="input-group-append">
                                     <form action="{% url "add_cart" cart_item.product.id %}" method="POST">
                                         {% csrf_token %}
-                                        {% for item in cart_item.variations.all %}
-                                            <input type="hidden" name="{{item.variation_category | lower}}" value="{{item.variation_value | capfirst }}">
+                                        {% for item in cart_item.stock.variation_combo.all %}
+                                            <input type="hidden" name="{{item.variation_category | capfirst}}" value="{{item.variation_value | capfirst}}">
                                         {% endfor %}
                                         <button class="btn btn-light" type="submit" id="button-minus"> <i class="fa fa-plus"></i> </button>
                                     </form>
@@ -63,14 +64,29 @@
                     </td>
                     <td> 
                         <div class="price-wrap"> 
-                            <var class="price">${{cart_item.sub_total}}</var> 
-                            <small class="text-muted"> ${{cart_item.stock.price}} </small> 
+                            <var class="price">${{cart_item.d_item_price}}</var> 
+                            <p class="text-muted"> <s>${{cart_item.stock.price}}</s> </p> 
                         </div> <!-- price-wrap .// -->
+                    </td>
+                    <td> 
+                        <div class="price-wrap"> 
+                            <var class="price">{{cart_item.discount}}%</var> 
+                        </div> <!-- discount-wrap .// -->
                     </td>
                     <td class="text-right"> 
                         <a href="{% url "remove_cart_item" cart_item.product.id cart_item.id %}" onclick="return confirm('Are you sure you wan to delete this item?')" class="btn btn-danger"> Remove</a>
                     </td>
                 </tr>
+                <tr>
+                    <td>
+                        {% if cart_item.product.bulk_offer_product.all %}
+                            <p>Discount info : Available</p>
+                        {% else %}
+                            <p>Discount info : not Available</p>
+                        {% endif %}
+                    </td>
+                </tr>
+                
     {% endfor %}   
   
     </tbody>
@@ -94,6 +110,10 @@
                   <dt>Grand Total:</dt>
                   <dd class="text-right text-dark b"><strong>${{grand_total}}</strong></dd>
                 </dl>
+                <dl class="dlist-align">
+                    <dt>Your Total Savings:</dt>
+                    <dd class="text-right text-dark b"><strong>${{total_savings}}</strong></dd>
+                  </dl>
                 <hr>
                 <p class="text-center mb-3">
                     <img src="{% static "/images/misc/payments.png" %}" height="26">

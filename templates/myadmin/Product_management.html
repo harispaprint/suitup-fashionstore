@@ -5,6 +5,7 @@
 <div class="main-content">
     <div class="dashboard-header">
         <h1 style="font-weight: bold">Product Management</h1>
+        <a href="{% url "add_product_variation"%}" class="btn btn-primary">Add Variations</a>
         <a href="{% url "add_product" %}" class="btn btn-primary">Add Product</a>
     </div>
     <table class="table text-center">
@@ -21,7 +22,7 @@
           {% for product in products %}
           <tr>
             <td>{{product.id}}</td>
-            <td>{{product.product_name}}</td>
+            <td class="text-left">{{product.product_name}}</td>
             <td>{{product.price}}</td>
             <td>{{product.stock}}</td>
             <td>
@@ -31,7 +32,6 @@
             <a href="{% url "activate_product" product.id %}" class="btn btn-success">Activate</a>
             {% endif %}
             <a href="{% url "edit_product" product.id %}" class="btn btn-primary">Edit</a>
-            <a href="{% url "add_product_variation" product.id %}" class="btn btn-primary">Add Variations</a>
             <a href="{% url "add_product_images" product.id %}" class="btn btn-primary">Add Images</a>
             <a href="{% url "delete_product" product.id %}" class="btn btn-danger">Delete</a>
           </td> 

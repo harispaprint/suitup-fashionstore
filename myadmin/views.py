@@ -1,15 +1,17 @@
 from django.shortcuts import render,get_object_or_404,redirect
 from django.urls import reverse
+from myadmin.forms import MyForm
 from orders.models import Order, OrderProduct
-from store.models import Product,ProductImage
+from store.models import Product,ProductImage, Stock,Variation
 from accounts.models import Account
 from category.models import Category
 from django.contrib import auth,messages
 from django.contrib.auth.decorators import login_required
-from store.forms import AddProductForm, AddVariationForm,ProductImageForm
+from store.forms import AddProductForm, AddVariationForm,ProductImageForm, StockForm
 from category.forms import AddCategoryForm
 from django.utils.text import slugify
 from .utils import admin_required
+from django.http import JsonResponse
 
 def admin_login(request):
     if request.method == 'POST':
@@ -74,6 +76,17 @@ def order_management(request):
     return render(request,'myadmin/order_management.html',context)
 
 @admin_required
+def inventory_management(request):
+    products = Product.objects.all()
+    variations = Variation.objects.all()
+    stocks = Stock.objects.all()
+    context = {
+        'stocks': stocks,
+        'products' : products
+    }
+    return render(request,'myadmin/inventory_management.html',context)
+
+@admin_required
 def admin_cancel_order_page(request,order_id):
     order =Order.objects.get(id=order_id)
     ordered_products = OrderProduct.objects.filter(order=order)
@@ -100,16 +113,6 @@ def admin_cancel_ordered_product(request,ordered_product_id):
             'ordered_products': ordered_products,
         }
     return render(request,'myadmin/admin_cancel_order_page.html',context)
-
-
-
-@admin_required
-def inventory_management(request):
-    products = Product.objects.all()
-    context = {
-        'products':products
-    }
-    return render(request,'myadmin/inventory_management.html',context)
 
 
 @admin_required
@@ -173,19 +176,21 @@ def add_product_images(request,product_id):
     return render(request,'myadmin/product_image_form.html',context)
 
 @admin_required
-def add_product_variation(request,product_id):
-    product = get_object_or_404(Product,id=product_id)
+def add_product_variation(request):
+    products = Product.objects.all()
     if request.method=='POST':
         variation_form = AddVariationForm(request.POST)
         if variation_form.is_valid():
             variation = variation_form.save(commit=False)
+            variation.is_active=True
             variation.save()
             messages.success(request, 'Variation added successfully!')
             return redirect('product_management')
     else:
-         variation_form = AddVariationForm(initial={'product': product})
+         variation_form = AddVariationForm()
     context = {
         'variation_form': variation_form,
+        'products':products,
     }
     return render(request,'myadmin/product_variation_form.html',context)
 
@@ -250,3 +255,95 @@ def delete_category(request,category_id):
     category.delete()
     print('category deleted')
     return redirect('category_management')
+
+@admin_required
+def add_product_stock(request):
+    if request.method == 'POST':
+        form = StockForm(request.POST)
+        if form.is_valid():
+            stock = form.save(commit=False)
+            # Generate search key based on product and variations
+            stock.save()
+            form.save_m2m()
+            messages.success(request, 'Stock created successfully.')
+            return redirect('inventory_management')
+    else:
+        form = StockForm()
+    return render(request, 'myadmin/product_stock_form.html', {'form': form, 'title': 'Create Stock'})
+
+@admin_required
+def update_product_stock(request, pk):
+    stock = get_object_or_404(Stock, pk=pk)
+    if request.method == 'POST':
+        form = StockForm(request.POST, instance=stock)
+        if form.is_valid():
+            stock = form.save(commit=False)
+            stock.save()
+            form.save_m2m()
+            messages.success(request, 'Stock updated successfully.')
+            return redirect('inventory_management')
+    else:
+        form = StockForm(instance=stock)
+    return render(request, 'myadmin/product_stock_form.html', {'form': form, 'title': 'Update Stock'})
+
+@admin_required
+def delete_stock(request,stock_id):
+    stock = get_object_or_404(Stock,id=stock_id)
+    stock.delete()
+    return redirect('inventory_management')
+
+from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
+
+def stock_create_view(request):
+    form = StockForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        form.save_m2m()
+        # Redirect or show success message
+    return render(request, 'stock_create.html', {'form': form})
+
+def load_variations(request):
+    product_id = request.GET.get('product_id')
+    variations = Variation.objects.filter(product_id=product_id).values('id', 'variation_category__name', 'variation_value')
+    return JsonResponse(list(variations), safe=False)
+
+def get_variations(request,product_id):
+    variations = Variation.objects.filter(product_id=product_id)
+    context={
+        'variations':variations,
+    }
+    return redirect('inventory_management')
+
+
+def get_variations(request, product_id):
+    # Fetch the variations for the given product
+    product = Product.objects.get(id=product_id)
+    variations = Variation.objects.filter(product=product, is_active=True)
+
+    # Prepare variations data to be sent as JSON
+    variation_data = []
+    for variation in variations:
+        variation_data.append({
+            'id': variation.id,
+            'variation_category': variation.variation_category.name,  # Assuming the category has a 'name' field
+            'variation_value': variation.variation_value
+        })
+
+    return JsonResponse({'variations': variation_data})
+
+from django.shortcuts import render
+from django.http import JsonResponse
+
+def my_view(request):
+    form = MyForm()
+    
+    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        form = MyForm(request.POST)
+        if form.is_valid():
+            selected_value = form.cleaned_data['selection']
+            response_data = {'message': f'You selected: {selected_value}'}  # Message to send back
+            return JsonResponse(response_data)
+    
+    return render(request, 'myadmin/my_template.html', {'form': form})
+

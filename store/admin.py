@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Product,ProductImage, Stock,Variation, VariationCategory,ReviewsRatings
+from .models import Product,ProductImage, Stock,Variation, VariationCategory,ReviewsRatings,BulkPurchaseOffer,Coupon
 
 class ProductAdmin(admin.ModelAdmin):
     list_display = ('product_name', 'price', 'stock', 'category', 'modified_date', 'is_available')
@@ -11,6 +11,7 @@ class VariationAdmin(admin.ModelAdmin):
     list_filter = ('product', 'variation_category', 'variation_value')
 
 
+
 admin.site.register(Stock)
 
 # Register your models here.
@@ -19,4 +20,6 @@ admin.site.register(ProductImage)
 admin.site.register(Variation, VariationAdmin)
 admin.site.register(VariationCategory)
 admin.site.register(ReviewsRatings)
+admin.site.register(Coupon)
+admin.site.register(BulkPurchaseOffer)
 

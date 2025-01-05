@@ -16,6 +16,8 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
@@ -88,6 +90,7 @@ TEMPLATES = [
     },
 ]
 
+WSGI_APPLICATION = 'razorpay_payment.wsgi.application'
 #Social login settings
 
 try:
@@ -145,6 +148,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Razorpay API credentials
+RAZORPAY_KEY_ID = "rzp_test_6e4mJb3uy18YBR"
+RAZORPAY_KEY_SECRET = "4UM4Roh63vmaYLm5g6BaAYzr"
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/

@@ -50,7 +50,7 @@
                 </div> <!-- card-body.// -->
             </div>
         </article> <!-- filter-group  .// -->
-        <article class="filter-group">
+        {% comment %} <article class="filter-group">
             <header class="card-header">
                 <a href="#" data-toggle="collapse" data-target="#collapse_4" aria-expanded="true" class="">
                     <i class="icon-control fa fa-chevron-down"></i>
@@ -122,7 +122,7 @@
                     <button class="btn btn-block btn-primary">Apply</button>
                 </div><!-- card-body.// -->
             </div>
-        </article> <!-- filter-group .// -->
+        </article> <!-- filter-group .// --> {% endcomment %}
         
     </div> <!-- card.// -->
     
@@ -139,7 +139,7 @@
     <div class="row">
        {% for product in products  %}
         <div class="col-md-4">
-            <figure class="card card-product-grid">
+            <figure class="card card-product-grid p-1">
                 <div class="img-wrap"> 
                     <a href="{{product.get_url}}" class="img-wrap"> <img src="{{product.images.url}}"> </a>
                     

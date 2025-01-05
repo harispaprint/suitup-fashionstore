@@ -1,36 +1,46 @@
 from django.db import models
 from accounts.models import Account,UserAddresses
-from store.models import Product,Variation
+from store.models import Product, Stock,Variation
 
 
 # Create your models here.
 class Payment(models.Model):
     user = models.ForeignKey(Account, on_delete=models.CASCADE)
-    payment_id = models.CharField(max_length=100)
-    payment_method = models.CharField(max_length=100)
+    razorpay_order_id = models.CharField(max_length=100, unique=True)
+    razorpay_payment_id = models.CharField(max_length=100, blank=True, null=True)
     amount_paid = models.CharField(max_length=100) # this is the total amount paid
-    status = models.CharField(max_length=100)
+    payment_verified = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
+    payment_status = models.CharField(max_length=20, default='pending')
+    failure_reason = models.CharField(max_length=100, null=True, blank=True)
+    verified_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
-        return self.payment_id
+        return self.razorpay_order_id
 
 
 class Order(models.Model):
     STATUS = (
-        ('New', 'New'),
-        ('Accepted', 'Accepted'),
-        ('Completed', 'Completed'),
-        ('Cancelled', 'Cancelled'),
+        ('Confiremd','confiremd'),
+        ('Shipped','shipped'),
+        ('Delivered','delivered'),
+        ('Cancelled','cancelled'),
+        ('Return','return'),
+    )
+
+    PAYMENT_MODES = (
+        ('Cash on Delivery','cash_on_delivery'),
+        ('Pay Now','pay_ow'),
     )
 
     user = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True)
+    payment_mode = models.CharField(max_length=200,choices=PAYMENT_MODES, default='cash_on_delivery')
     payment = models.ForeignKey(Payment, on_delete=models.SET_NULL, blank=True, null=True)
     order_number = models.CharField(max_length=20)
     order_address = models.ForeignKey(UserAddresses,on_delete=models.SET_NULL,null=True)
     order_total = models.FloatField()
     tax = models.FloatField()
-    status = models.CharField(max_length=10, choices=STATUS, default='New')
+    status = models.CharField(max_length=10, choices=STATUS, default='confirmed')
     ip = models.CharField(blank=True, max_length=20)
     is_ordered = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -51,7 +61,7 @@ class OrderProduct(models.Model):
     payment = models.ForeignKey(Payment, on_delete=models.SET_NULL, blank=True, null=True)
     user = models.ForeignKey(Account, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    variations = models.ManyToManyField(Variation, blank=True)
+    stock = models.ForeignKey(Stock,on_delete=models.CASCADE,null=True)
     quantity = models.IntegerField()
     product_price = models.FloatField()
     ordered = models.BooleanField(default=False)

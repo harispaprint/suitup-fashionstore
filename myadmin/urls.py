@@ -2,6 +2,7 @@ from django.urls import path
 from . import views
 
 
+
 urlpatterns = [
     path('',views.admin_login,name='admin_login'),
     path('admin_logout/',views.admin_logout,name='admin_logout'),
@@ -13,7 +14,7 @@ urlpatterns = [
     
     path('product_management/',views.product_management,name='product_management'),
     path('add_product',views.add_product,name='add_product'),
-    path('add_product_variation/<int:product_id>',views.add_product_variation,name='add_product_variation'),
+    path('add_product_variation/',views.add_product_variation,name='add_product_variation'),
     path('add_product_images/<int:product_id>',views.add_product_images,name='add_product_images'),
     path('edit_product/<int:product_id>',views.edit_product,name='edit_product'),
     path('deactivate_product/<int:product_id>',views.product_status_update,name='deactivate_product'),
@@ -29,5 +30,14 @@ urlpatterns = [
     path('admin_cancel_order/<int:order_id>/',views.admin_cancel_order,name='admin_cancel_order'),
 
     path('inventory_management/',views.inventory_management,name='inventory_management'),
+    path('add_product_stock/', views.add_product_stock, name='add_product_stock'),
+    path('<int:pk>/update_product_stock/', views.update_product_stock, name='update_product_stock'),
+    path('delete_stock/<int:stock_id>',views.delete_stock,name='delete_stock'),
+
+    path('create-stock/', views.stock_create_view, name='create_stock'),
+    path('load-variations/', views.load_variations, name='load_variations'),
     
+    path('get-variations/<int:product_id>/', views.get_variations, name='get_variations'),
+     path('my-view/', views.my_view, name='my-view'),
+
 ]

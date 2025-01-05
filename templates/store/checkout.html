@@ -34,7 +34,7 @@
                                 <a href="{% url 'edit_user_address' user_address.id %}?next=checkout" class="btn btn-danger">Edit</a>
                             </div>
                             <div>
-                                <a href="{% url 'add_user_address' %}?next=checkout" class="btn btn-danger">delete</a>
+                                <a href="{% url 'delete_user_address' user_address.id %}" class="btn btn-danger delete-link" data-id="{{ user_address.id }}">Delete</a>
                             </div>
                         </div>
                           <br>
@@ -64,8 +64,8 @@
                                         <figcaption class="info">
                                             <a href="{{ cart_item.product.get_url }}" class="title text-dark">{{ cart_item.product.product_name }}</a>
                                             <p class="text-muted small">
-                                                {% if cart_item.variations.all %}
-                                                    {% for item_variation in cart_item.variations.all %}
+                                                {% if cart_item.stock.variation_combo.all %}
+                                                    {% for item_variation in cart_item.stock.variation_combo.all %}
                                                         {{ item_variation.variation_category.name | capfirst }} : {{ item_variation.variation_value | capfirst }} <br>
                                                     {% endfor %}
                                                 {% endif %}
@@ -92,7 +92,7 @@
             <div class="card">
             <div class="card-body">
                 
-            <button type="submit" name="submit" class="btn btn-primary btn-block">Place Order</button>
+            <button type="submit" name="submit" class="btn btn-primary btn-block">Continue</button>
             </form>
 
             <script>
@@ -106,6 +106,20 @@
                             alert("Please select an address to proceed.");
                             event.preventDefault(); // Prevent form submission
                         }
+                    });
+                });
+
+                document.addEventListener("DOMContentLoaded", function () {
+                    // Attach click event listener to all delete links
+                    document.querySelectorAll('.delete-link').forEach(link => {
+                        link.addEventListener('click', function (event) {
+                            event.preventDefault(); // Prevent default action
+                            const confirmation = confirm("Are you sure you want to delete this address?");
+                            if (confirmation) {
+                                // Redirect to the link's href if confirmed
+                                window.location.href = this.href;
+                            }
+                        });
                     });
                 });
             </script>

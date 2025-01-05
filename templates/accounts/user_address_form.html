@@ -25,38 +25,74 @@
 					<div class="form-row">
 						<div class="form-group col-md-6">
 							<label>First Name</label>
-							{{address_form.first_name}}
+							{{ address_form.first_name }}
+							{% if address_form.first_name.errors %}
+								<div class="text-danger">
+									{{ address_form.first_name.errors|striptags }}
+								</div>
+							{% endif %}
 						</div>
 						<div class="form-group col-md-6">
 							<label>Last Name</label>
-							{{address_form.last_name}}
+							{{ address_form.last_name }}
+							{% if address_form.last_name.errors %}
+								<div class="text-danger">
+									{{ address_form.last_name.errors|striptags }}
+								</div>
+							{% endif %}
 						</div>
 					</div>
-					
+				
 					<div class="form-group">
 						<label>Address Line 1</label>
-						{{address_form.address_line_1}}
+						{{ address_form.address_line_1 }}
+						{% if address_form.address_line_1.errors %}
+							<div class="text-danger">
+								{{ address_form.address_line_1.errors|striptags }}
+							</div>
+						{% endif %}
 					</div>
 					<div class="form-group">
 						<label>Address Line 2</label>
-						{{address_form.address_line_2}}
+						{{ address_form.address_line_2 }}
+						{% if address_form.address_line_2.errors %}
+							<div class="text-danger">
+								{{ address_form.address_line_2.errors|striptags }}
+							</div>
+						{% endif %}
 					</div>
 					<div class="form-row">
 						<div class="form-group col-md-4">
 							<label>City</label>
-							{{address_form.city}}
+							{{ address_form.city }}
+							{% if address_form.city.errors %}
+								<div class="text-danger">
+									{{ address_form.city.errors|striptags }}
+								</div>
+							{% endif %}
 						</div>
 						<div class="form-group col-md-4">
 							<label>State</label>
-							{{address_form.state}}
+							{{ address_form.state }}
+							{% if address_form.state.errors %}
+								<div class="text-danger">
+									{{ address_form.state.errors|striptags }}
+								</div>
+							{% endif %}
 						</div>
 						<div class="form-group col-md-4">
 							<label>Country</label>
-							{{address_form.country}}
+							{{ address_form.country }}
+							{% if address_form.country.errors %}
+								<div class="text-danger">
+									{{ address_form.country.errors|striptags }}
+								</div>
+							{% endif %}
 						</div>
 					</div>
 					<input type="submit" value="Save" class="btn btn-primary">
 				</form>
+				
 			</div>
 
 			</div> <!-- row.// -->

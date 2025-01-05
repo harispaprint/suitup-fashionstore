@@ -59,7 +59,7 @@ class Variation(models.Model):
     created_date = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.variation_category.name}: {self.variation_value}"
+        return f"{self.product.product_name}-{self.variation_category.name}-{self.variation_value}"
 
 
 class Stock(models.Model):
@@ -69,8 +69,24 @@ class Stock(models.Model):
     price = models.IntegerField(default=0)
     search_key = models.CharField(max_length=255,null=True,blank=True)
 
+    def variation_info(self):
+        variations = ", ".join([str(variation.variation_category.name)+":"+str(variation.variation_value)  for variation in self.variation_combo.all()])
+        return f"{variations}"
+
+    def discounted_price(self,item_qty):
+        try:
+            offer = BulkPurchaseOffer.objects.filter(product=self.product).first()
+            print(offer)
+            if item_qty>=offer.min_qty:
+                d_price = self.price*(1-offer.current_discount(item_qty)/100)
+            else:
+                d_price = self.price
+        except BulkPurchaseOffer.DoesNotExist:
+            d_price = self.price
+        return d_price
+
     def __str__(self):
-        variations = ", ".join([str(variation) for variation in self.variation_combo.all()])
+        variations = ", ".join(str(variation.variation_category.name)+":"+str(variation.variation_value) for variation in self.variation_combo.all())
         return f"{self.product.product_name} - {variations}"
     
 class ReviewsRatings(models.Model):
@@ -86,3 +102,32 @@ class ReviewsRatings(models.Model):
 
     def __str__(self):
         return f"{self.product.product_name} - {self.user.username}"
+    
+class Coupon(models.Model):
+    coupon_code = models.CharField(max_length=100)
+    coupon_description = models.TextField(null=True,blank=True)
+    coupon_discount = models.IntegerField(default=1)
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.coupon_code
+
+class BulkPurchaseOffer(models.Model):
+    product = models.ForeignKey(Product,on_delete=models.CASCADE,related_name='bulk_offer_product')
+    offer_name = models.CharField(max_length=100)
+    min_qty = models.IntegerField()
+    fixed_discount = models.IntegerField(default=5)
+    is_active = models.BooleanField(default=True)
+    is_fixed = models.BooleanField(default=True)
+
+    def current_discount(self,item_qty):
+        if not self.is_fixed:
+            c_discount = (item_qty//self.min_qty)*self.fixed_discount
+        else:
+            c_discount = self.fixed_discount
+        return c_discount
+
+    def __str__(self):
+        return f"{self.offer_name} - {self.product.product_name}"
+
+    

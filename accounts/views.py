@@ -236,7 +236,7 @@ def order_detail(request, order_id):
     order_user = order.user
     print(f"current_user : {current_user}")
     print(f"order_user : {order_user}")
-    if request.user == order.user:
+    if request.user == order.user or request.user.is_admin:
         for i in order_detail:
             subtotal += i.product_price * i.quantity
 
@@ -310,8 +310,12 @@ def edit_user_address(request,address_id):
     return render(request, 'accounts/user_address_form.html', context)
 
 @login_required(login_url='login')
+
 def delete_user_address(request,address_id):
+    url = request.META.get('HTTP_REFERER')
     useraddress = UserAddresses.objects.get(user=request.user,id=address_id)
-    if request.method == 'POST':
-        useraddress.delete()
-        return redirect('my_orders')
+    useraddress.delete()
+    return redirect(url)
+
+def email_view(request):
+    return redirect('user_dashboard')

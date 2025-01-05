@@ -15,14 +15,29 @@ class Cart(models.Model):
 class CartItem(models.Model):
     user = models.ForeignKey(Account,on_delete=models.CASCADE,null=True)
     product = models.ForeignKey(Product,on_delete=models.CASCADE)
-    variations = models.ManyToManyField(Variation,blank=True)
     cart = models.ForeignKey(Cart,on_delete=models.SET_NULL,null=True)
     stock = models.ForeignKey(Stock,on_delete=models.CASCADE,null=True)
     quantity = models.IntegerField()
+    discount = models.FloatField(default=0)
+    d_item_price = models.FloatField(default=0)
+    savings = models.FloatField(default=0)
     is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['id']  # Ascending order by id
+
 
     def sub_total(self):
         return self.stock.price*self.quantity
 
     def __unicode__(self):
         return self.product
+    
+class CartOffer(models.Model):
+    offer_name = models.CharField(max_length=100)
+    min_amount = models.IntegerField()
+    discount = models.IntegerField(default=5)
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"{self.offer_name}" 

@@ -9,6 +9,19 @@
       <h4 class="card-title">Add Product Variation</h4>
     </header>
 
+    <div>
+      <label for="product_name">Product Name:</label>
+      <select id="product_name" name="product_name" class="form-control w-50 h-25">
+        {% for product in products %}
+          <option value="{{ product.id }}">{{ product.product_name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+   
+    
+
+
+
     <div class="container mt-5">
       <form method="post">
           {% csrf_token %}
@@ -28,10 +41,46 @@
               {{ variation_form.variation_value }}
           </div>
           
-          <button type="submit" class="btn btn-primary btn-block">Submit</button>
+          <button type="submit" class="btn btn-primary btn-block w-auto">Submit</button>
       </form>
     </div>
   </article>
 </div>
+
+<!-- Div to display variations dynamically -->
+<div id="variation-display">
+  <h4>Existing Variations</h4>
+  <ul id="variation-list">
+    <!-- Variations will be populated here -->
+  </ul>
+</div>
+
+<script>
+  document.getElementById('product_name').addEventListener('change', function() {
+    const productId = this.value; // Get the selected product ID
+    if (productId) {
+      fetchVariations(productId);  // Fetch the related variations
+    }
+  });
+
+  function fetchVariations(productId) {
+    fetch(`/admin/get-variations/${productId}/`)  // Make the fetch request to get variations
+      .then(response => response.json())
+      .then(data => {
+        const variationList = document.getElementById('variation-list');
+        variationList.innerHTML = '';  // Clear existing variations
+
+        if (data.variations.length > 0) {
+          data.variations.forEach(variation => {
+            const li = document.createElement('li');
+            li.textContent = `${variation.variation_category}: ${variation.variation_value}`;
+            variationList.appendChild(li);
+          });
+        } else {
+          variationList.innerHTML = '<li>No variations available.</li>';
+        }
+      });
+  }
+</script>
 {% endblock content %}
 
