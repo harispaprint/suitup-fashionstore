@@ -1,0 +1,210 @@
+{% extends "base_admin.html" %}
+{% load static %}
+{% block content %}
+
+<head>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  
+    <!-- Popper.js (required for Bootstrap) -->
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+  
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.min.js"></script>
+  
+  </head>
+
+   <div class="container row justify-content-between">
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter">
+        Sales report search
+        </button>
+        {% if sale_date %}
+        <a class="btn btn-primary" href="{% url 'generate_pdf_from_template' sale_date %}">Download PDF</a>
+        {% endif %}
+        {% comment %} <a class="btn btn-primary" href="{% url 'export_excel' %}">Download Excel</a> {% endcomment %}
+  </div>
+
+  <!-- Modal for search of sales_report -->
+  <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLongTitle">Sales Report Search</h5>
+          
+        </div>
+        <div class="modal-body">
+            <div class="mb-8">
+                
+                <form action="{% url "sales_report" %}" method="get">
+                    <label for="report-type">Select Report Type:</label>
+                    <select id="report-type" name="report-type" onchange="showDateInput()">
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="yearly">Yearly</option>
+                        <option value="custom_date">Custom Dates</option>
+                    </select>
+                    <br><br>
+            
+                    <div id="daily" class="date-input">
+                        <label for="daily-date">Select Date:</label>
+                        <input type="date" id="daily-date" name="daily-date">
+                    </div>
+            
+                    <div id="weekly" class="date-input">
+                        <label for="weekly-week">Select Week end date:</label>
+                        <input type="date" id="week-date" name="weekly-date">
+                        <br>
+                        <small>The previous six days before the end date will be chosen.</small>
+                        <p id="message" style="color: red; font-weight: bold;"></p>
+                    </div>
+            
+                    <div id="monthly" class="date-input">
+                        <label for="monthly-month">Select Month:</label>
+                        <input type="month" id="monthly-month" name="monthly-month">
+                    </div>
+            
+                    <div id="yearly" class="date-input">
+                        <label for="yearly-year">Select Year:</label>
+                        <select id="yearly-year" name="yearly-year">
+                            <option value="2025">2025</option>
+                            <option value="2024">2024</option>
+                            <option value="2023">2023</option>
+                            <option value="2022">2022</option>
+                            <option value="2021">2021</option>
+                            <!-- Add more years as required -->
+                        </select>
+                    </div>
+
+                    <div id="custom_date_range" class="date-input">
+                        <label for="custom_start_date">Select start date:</label>
+                        <input type="date" id="custom_start_date" name="custom_start_date">
+                        <br>
+                        <label for="custom_start_date">Select end date:</label>
+                        <input type="date" id="custom_end_date" name="custom_end_date">
+                    </div>
+                    
+                    <br><br>
+                    <button type="submit">Generate Report</button>
+                </form>
+                        
+                    </div>
+                </div>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+
+ <div class="container" style="margin: 0 auto;width: 100%;padding: 20px;background:rgb(251, 248, 248);margin-top: 50px;margin-bottom: 50px;">
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="invoice-logo"><img class="logo" src="{% static "./images/suitup_logo.png" %}" alt="Invoice logo" style="max-height: 40px;">
+                </div>
+            </div>
+           
+            <div class="col-lg-12">
+                <!-- col-lg-12 start here -->
+                <div class="invoice-details mt25">
+                    <div class="well">
+                        <ul class="list-unstyled mb0">
+                            <li><strong>Report Type</strong> : {{report_type}}</li>
+                            <li><strong>{% if report_type == 'weekly' %}Start Date:{% else %}Sale Date:{% endif %} </strong> : {{start_date}}</li>
+                            {% if report_type == 'weekly' or report_type == 'monthly' or report_type == 'yearly' %}
+                            <li><strong>End Date:</strong> {{end_date}}</li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="invoice-items">
+                    <div class="table-responsive" style="overflow: hidden; outline: none;" tabindex="0">
+
+                               
+
+                        <div class="sales-details mt-4">
+                            <h3 class="text-secondary">Sales Details</h3>
+                            <div class="table-responsive"> 
+
+                                {% if report_type == 'daily' %}
+                                    {% include "myadmin/sales_report/daily.html" %}
+                                {% elif report_type == 'weekly' %}
+                                    {% include "myadmin/sales_report/weekly.html" %}
+                                {% elif report_type == 'monthly' %}
+                                    {% include "myadmin/sales_report/monthly.html" %}
+                                {% elif report_type == 'yearly' %}
+                                    {% include "myadmin/sales_report/yearly.html" %}
+                                {% endif %}
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showDateInput() {
+            const reportType = document.getElementById("report-type").value;
+
+            // Hide all date input fields initially
+            const dateInputs = document.querySelectorAll(".date-input");
+            dateInputs.forEach(input => input.style.display = "none");
+
+            // Show the corresponding date input field based on report type
+            if (reportType === "daily") {
+                document.getElementById("daily").style.display = "block";
+            } else if (reportType === "weekly") {
+                document.getElementById("weekly").style.display = "block";
+            } else if (reportType === "monthly") {
+                document.getElementById("monthly").style.display = "block";
+            } else if (reportType === "yearly") {
+                document.getElementById("yearly").style.display = "block";
+            } else if (reportType === "custom_date") {
+                document.getElementById("custom_date_range").style.display = "block";
+            }
+        }
+
+        // Initially call to set the default view (Daily)
+        showDateInput();
+
+        // Set the max attribute to today's date
+        const today = new Date().toISOString().split("T")[0]; // Format: YYYY-MM-DD 
+        
+        const dateInputWeek = document.getElementById("week-date");
+        dateInputWeek.setAttribute("max", today);
+
+        const dateInputDaily = document.getElementById("daily-date");
+        dateInputDaily.setAttribute("max", today);
+
+
+
+       // Get the date input elements
+        const dateInputCustomStart = document.getElementById("custom_start_date");
+        const dateInputCustomEnd = document.getElementById("custom_end_date");
+
+        // Set the maximum date for both inputs to today
+        
+        dateInputCustomStart.setAttribute("max", today);
+        dateInputCustomEnd.setAttribute("max", today);
+
+        // Add an event listener to update the "min" attribute of the end date
+        dateInputCustomStart.addEventListener("change", () => {
+        const startDate = dateInputCustomStart.value; // Get the selected start date
+        dateInputCustomEnd.setAttribute("min", startDate); // Set the minimum end date to the selected start date
+
+        // Optional: If the end date is earlier than the start date, reset it
+        if (dateInputCustomEnd.value && dateInputCustomEnd.value < startDate) {
+            dateInputCustomEnd.value = startDate;
+        }
+});
+    </script>
+
+   
+  
+{% endblock content %}

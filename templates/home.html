@@ -30,6 +30,11 @@
 	 <div class="col-md-3">
 		 <figure class="card card-product-grid p-2">
 			 <div class="img-wrap"> 
+				<!-- Heart Icon -->
+				<a href="{% url 'update_wishlist' product.id %}" class="position-absolute wishlist-icon">
+					<div class="icon icon-sm">
+						<i class="fas fa-heart {% if product.whishlist_product.exists %}text-danger{% else %}text-muted{% endif %}"></i>
+					</div>
 				 <a href="{{product.get_url}}" class="img-wrap"> <img src="{{product.images.url}}"> </a>
 				 
 			 </div> <!-- img-wrap.// -->
@@ -37,7 +42,7 @@
 				 <div class="fix-height">
 					 <a href="{{product.get_url}}" class="title">{{product.product_name}}</a>
 					 <div class="price-wrap mt-2">
-						 <span class="price">${{product.price}}</span>
+						 <span class="price">₹{{product.price}}</span>
 
 					 </div> <!-- price-wrap.// -->
 				 </div>
@@ -51,10 +56,6 @@
 </div><!-- container // -->
 </section>
 <!-- ========================= SECTION  END// ========================= -->
-
-
-
-
 
 </body>
 </html>

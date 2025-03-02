@@ -10,22 +10,22 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
+import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load .env file
+load_dotenv()
+
+# Use environment variables
+SECRET_KEY = os.getenv('SECRET_KEY')
+DEBUG = os.getenv('DEBUG') == 'True'
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-)0f%61@75q&c)l$+ct#93g^2sjl1mv3y6rts3902*61&9ajdas'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
 
 ALLOWED_HOSTS = []
 
@@ -85,6 +85,7 @@ TEMPLATES = [
                 'category.context_processors.menu_links',
                 'carts.context_processors.counter',
                 'store.context_processors.breadcrumbs_processor',
+                'store.context_processors.wishlist_counter',
             ],
         },
     },
@@ -122,13 +123,14 @@ AUTH_USER_MODEL = 'accounts.Account'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'suitup',  # Replace with the name of your PostgreSQL database
-        'USER': 'postgres',  # Replace with your PostgreSQL username
-        'PASSWORD': 'kmea7034',   # Replace with your PostgreSQL password
-        'HOST': 'localhost',           # Set to 'localhost' or your database host address
-        'PORT': '5432',                # Default PostgreSQL port is 5432
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT', '5432'),
     }
 }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -147,10 +149,6 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-
-# Razorpay API credentials
-RAZORPAY_KEY_ID = "rzp_test_6e4mJb3uy18YBR"
-RAZORPAY_KEY_SECRET = "4UM4Roh63vmaYLm5g6BaAYzr"
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
@@ -173,6 +171,12 @@ STATICFILES_DIRS = [
     'suitup/static',
 ]
 
+# Add the domain for the production or local server
+from django.contrib.sites.shortcuts import get_current_site
+
+STATIC_URL_PREFIX = 'http://127.0.0.1:8000'  # Adjust for production environment
+
+
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
@@ -188,10 +192,19 @@ MESSAGE_TAGS = {
     messages.ERROR: 'danger',
 }
 
-#SMTP Configuration
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_HOST_USER = 'harispaprint@gmail.com'
-EMAIL_HOST_PASSWORD = 'cgutvyprpsaclnes'
-EMAIL_USE_TLS = True
+
+
+WKHTMLTOPDF_CMD = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
+
+
+# Fetch Razorpay credentials
+RAZORPAY_KEY_ID = os.getenv('RAZORPAY_KEY_ID')
+RAZORPAY_KEY_SECRET = os.getenv('RAZORPAY_KEY_SECRET')
+
+# Email Configuration
+EMAIL_BACKEND = os.getenv('EMAIL_BACKEND')
+EMAIL_HOST = os.getenv('EMAIL_HOST')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))  # Convert to int
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'  # Convert to boolean

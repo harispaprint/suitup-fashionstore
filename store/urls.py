@@ -13,5 +13,8 @@ urlpatterns = [
     path('check-stock/<int:product_id>/', views.check_stock, name='check_stock'),
 
     path('review/submit/<int:product_id>/',views.review_submit,name='review_submit'),
+    path('wishlist/',views.wishlist,name='wishlist'),
+    path('update_wishlist/<int:product_id>',views.update_wishlist,name='update_wishlist'),
+    path('remove_wishlist/<int:product_id>',views.remove_wishlist,name='remove_wishlist'),
 ]
 

@@ -2,7 +2,7 @@
 {% load static %}
 {% block content %}
 
-<div class="main-content">
+ <div class="main-content">
     <div class="dashboard-header">
         <h1 style="font-weight: bold">Order Management</h1>
         
@@ -13,7 +13,7 @@
             <th scope="col">Order #</th>
             <th scope="col">Billing Name</th>
             <th scope="col">Order Total</th>
-            <th scope="col">Date</th>
+            <th scope="col">Date and Time</th>
             <th scope="col">Status</th>
             <th scope="col">Action</th>
           </tr>
@@ -22,16 +22,203 @@
           {% for order in orders %}
 				    <tr>
               <th scope="row"><a href="{% url 'order_detail' order.order_number %}" >{{order.order_number}}</a></th>
-				      <td>{{order.order_address.full_name}}</td>
-				      <td>${{order.order_total}}</td>
-					    <td>{{order.created_at}}</td>
-              <td>{{order.status}}</td>
-					    <td><a href="{% url "admin_cancel_order_page" order.id%}" class="btn btn-primary">Cancel Order</a></td>
+				      
+              <td>{{order.order_address.full_name}}</td>
+				      
+              <td>₹{{order.grand_order_total}}</td>
+					    
+              <td>{{order.updated_at}}</td>
+              
+              <td>
+                  <!-- Status Modal starts -->
+                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#testModal{{order.id}}">
+                  Check Status
+                </button>
+                <div class="modal fade" id="testModal{{order.id}}" tabindex="-1" role="dialog" aria-labelledby="testModalLabel{{order.id}}" aria-hidden="true">
+                  <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <div class="col">
+                          <h6 class="modal-title" id="testModalLabel{{order.id}}">
+                            <strong>Order No:</strong> {{order.order_number}}
+                          </h6>
+                          <h6 class="modal-title">
+                            <strong>Updated on:</strong> {{order.updated_at}}
+                          </h6>
+                        </div>
+                        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                        </button>
+                      </div>
+                      <div class="modal-body">
+                        <table class="table">
+                          <thead class="thead-dark">
+                            <tr>
+                              <th scope="col">Product</th>
+                              <th scope="col">Quantity</th>
+                              <th scope="col">Total Price</th>
+                              <th scope="col">Status</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {% for order_product in order.order_products.all %}
+                            <tr>
+
+                              <td>{{ order_product.product }}</td>
+                              
+                              <td>{{ order_product.quantity }}</td>
+                              
+                              <td>{{ order_product.product_price }}</td>
+                              
+                              <td>
+                                <!-- Update Status Form -->
+                                {% if order_product.status != 'return_requested' %}
+                                <form class="update-status-form" action="{% url 'update_order_product_status' order_product.id %}" method="POST">
+                                  {% csrf_token %}
+                                  <select name="status" class="status-select">
+                                      <option value="{{order_product.status}}">{{order_product.status}}</option>
+                                    {% if order_product.status == 'confirmed' %}
+                                      <option value="shipped">Shipped</option>
+                                    {% endif %}
+                                    {% if order_product.status == 'shipped' %}
+                                      <option value="delivered">Delivered</option>
+                                    {% endif %}
+                                  </select>
+                                  <button type="submit" class="btn btn-success btn-sm" data-bs-dismiss="modal">Update</button>
+                                </form>
+                                {% endif %}
+                              </td>
+
+                            </tr>
+                            {% endfor %}
+                          </tbody>
+                        </table>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                  <!-- Status Modal ends --> 
+              </td>
+              {% if order.has_returns %}
+              <td>
+                <!-- Return Modal starts -->
+              <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#returnModal{{order.id}}">
+                Return Requets
+              </button>
+              <div class="modal fade" id="returnModal{{order.id}}" tabindex="-1" role="dialog" aria-labelledby="returnModalLabel{{order.id}}" aria-hidden="true">
+                <div class="modal-dialog modal-lg" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <div class="col">
+                        <h6 class="modal-title" id="returnModalLabel{{order.id}}">
+                          <strong>Order No:</strong> {{order.order_number}}
+                        </h6>
+                        <h6 class="modal-title">
+                          <strong>Updated on:</strong> {{order.updated_at}}
+                        </h6>
+                      </div>
+                      <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                    <div class="modal-body">
+                      {% for order_product in order.order_products.all %}
+                      {% if order_product.order_return.first %}
+                      <table class="table">
+                        <thead class="thead-dark">
+                          <tr>
+                            <th scope="col">Product</th>
+                            <th scope="col">Quantity</th>
+                            <th scope="col">Total Price</th>
+                            <th scope="col">Status</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                         
+                          <tr>
+
+                            <td>{{ order_product.product }}</td>
+                            
+                            <td>{{ order_product.quantity }}</td>
+                            
+                            <td>{{ order_product.product_price }}</td>
+                            
+                            <td>{{order_product.order_return.first.status}}</td>
+
+                          </tr>
+                        
+                        </tbody>
+                      </table>
+                       <!-- Update return Form -->
+                       <form action="{% url 'order_product_return_decision' order_product.id %}" method="post">
+                          {% csrf_token %}
+                          <label for="select"><b>Admin Decision</b></label>
+                          <select name="decision" id="decision" class="decision-select">
+                              <option value="" disabled selected>Select an option</option>
+                              <option value="approved">Approved</option>
+                              <option value="rejected">Rejected</option>
+                          </select>
+                          <button type="submit" class="btn btn-success btn-sm">Update</button>
+                      </form>
+                    
+                          {% endif %}
+                          {% endfor %}
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+                <!-- Ends Modal ends --> 
+            </td>
+            {% endif %}
+            </tr>
 				{% endfor %}
         </tbody>
       </table>
       
-      
 </div>
+
+<script>
+  $(document).ready(function() {
+    // Delegate the submit event to handle multiple forms
+    $(document).on('submit', '.update-status-form', function(event) {
+      event.preventDefault();  // Prevent the form from submitting normally
+  
+      var status = $(this).find('.status-select').val();  // Get selected status
+      var csrfToken = $(this).find('input[name="csrfmiddlewaretoken"]').val();  // Get CSRF token
+      var formAction = $(this).attr('action');  // Get the form action (URL)
+  
+      // Perform AJAX request
+      $.ajax({
+        url: formAction,  // Use the action URL from the form
+        type: "POST",
+        data: {
+          status: status,  // Send status along with other data
+          csrfmiddlewaretoken: csrfToken
+        },
+        success: function(response) {
+          if (response.success) {
+            alert(response.message);
+            // Optionally update the UI with the new status
+          } else {
+            alert("Error: " + response.message);
+          }
+        },
+        error: function(xhr, errmsg, err) {
+          alert("An error occurred: " + errmsg);
+        }
+      });
+    });
+  });
+  
+
+</script> 
+
+
 
 {% endblock content %}

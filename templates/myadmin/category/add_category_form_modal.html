@@ -1,0 +1,46 @@
+<!-- Button to Open Modal -->
+<button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addCouponModal">
+  Add Category
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="addCouponModal" tabindex="-1" aria-labelledby="addCouponModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h6 class="modal-title"><strong>Category Form</strong></h6>
+              <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+              </button>
+          </div>
+          <div class="modal-body">
+              <form id="category-form" action="{% url 'add_category_ajax' %}" method="POST" enctype="multipart/form-data">
+                  {% csrf_token %}
+                  
+                  <div class="mb-3">
+                      <label for="category_name"><b>Category Name</b></label>
+                      {{ category_add_form.category_name }}
+                      <div class="text-danger" id="category_name_error"></div>
+                  </div>
+
+                  <div class="mb-3">
+                      <label for="description"><b>Description</b></label>
+                      {{ category_add_form.description }}
+                      <div class="text-danger" id="description_error"></div>
+                  </div>
+
+                  <div class="mb-3">
+                      <label for="cat_image"><b>Category Image</b></label>
+                      {{ category_add_form.cat_image }}
+                      <div class="text-danger" id="cat_image_error"></div>
+                  </div>
+
+                  <button type="submit" class="btn btn-primary">Add Category</button>
+              </form>
+          </div>
+          <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+      </div>
+  </div>
+</div>

@@ -13,15 +13,16 @@ urlpatterns = [
     path('dashboard/',views.user_dashboard,name='user_dashboard'),
     path('email/', views.email_view, name='email_view'),
     
-
-    path('my_orders/', views.my_orders, name='my_orders'),
     path('edit_profile/', views.edit_profile, name='edit_profile'),
-    
-    path('order_detail/<int:order_id>/', views.order_detail, name='order_detail'),
+        
     path('saved_addresses/',views.saved_addresses,name='saved_addresses'),
     path('set_default_address/<int:address_id>/',views.set_default_address,name='set_default_address'),
     path('add_user_address/', views.add_user_address, name='add_user_address'),
     path('edit_user_address/<int:address_id>/', views.edit_user_address, name='edit_user_address'),
     path('delete_user_address/<int:address_id>/', views.delete_user_address, name='delete_user_address'),
+    
+    path('wallet/<slug:status>/',views.wallet,name='wallet'),
+    path('wallet/',views.wallet,name='wallet'),
 
+    
 ]

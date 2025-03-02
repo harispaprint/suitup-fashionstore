@@ -1,8 +1,13 @@
+
 // jQuery ready start
 $(document).ready(function () {
+  if (typeof checkStockUrl === "undefined") {
+    console.error("checkStockUrl is not defined. Make sure it is set in product_detail.html.");
+    return;
+}
   const allDropdowns = $('select'); // Cache all dropdowns
   
-  allDropdowns.change(function () {
+  function checkStock() {
     // Check if any dropdown is empty
     const hasEmptyDropdown = allDropdowns.toArray().some(dropdown => !$(dropdown).val());
 
@@ -30,8 +35,9 @@ $(document).ready(function () {
               <i class="fas fa-shopping-cart"></i>
             </button>
           `);
+          let price = response.product_price.replace('$', ''); // Remove $ if present
           $('#product-price').html(`
-            <h4 class="price">${response.product_price}</h4>
+            <h4 class="price">₹${price}</h4>
           `);
         } else {
           $('#add-cart-button').html(`
@@ -46,7 +52,14 @@ $(document).ready(function () {
         console.error("Error:", error);
       }
     });
-  });
+  }
+// Call checkStock on dropdown change
+allDropdowns.change(checkStock);
+
+  // Initial check if all dropdowns have default values
+if (!allDropdowns.toArray().some(dropdown => !$(dropdown).val())) {
+  checkStock();
+}
 });
 
 
@@ -118,3 +131,4 @@ if (mainImage && zoomWindow) {
 function confirmDelete() {
     return confirm("Are you sure you want to delete this item?");
 }
+

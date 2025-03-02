@@ -1,0 +1,38 @@
+<table class="table table-striped table-bordered">
+    <thead class="table-primary">
+        <tr>
+            <th>Sale Time</th>
+            <th>Product Name</th>
+            <th>Quantity Sold</th>
+            <th>Price per Unit</th>
+            <th>Total Sales</th>
+        </tr>
+    </thead>
+    <tbody id="sales-data">
+        {% for order_product in order_prodcuts %}
+        <tr>
+            <td>{{order_product.created_at|time}}</td>
+            <td>{{order_product.product}}</td>
+            <td>{{order_product.quantity}}</td>
+            <td>₹{{order_product.product_price}}</td>
+            <td>₹{{order_product.total_price}}</td>
+        </tr>
+        {% endfor %}
+        <tr class="fw-bold text-success text-center" >
+            <td colspan="3">Total Sales</td>
+            <td colspan="3">₹{{daily_total}}</td>
+        </tr>
+        <tr class="fw-bold text-success text-center">
+            <td colspan="3">Average sale per transaction</td>
+            <td colspan="3">₹{{average_sale_per_transaction}}</td>
+        </tr>
+        <tr class="fw-bold text-success">
+            <td colspan="3">Best Selling Product</td>
+            <td colspan="3">{{best_selling_product}}</td>
+        </tr>
+        <tr class="fw-bold text-success">
+            <td colspan="3">Overall Discount</td>
+            <td colspan="3">₹{{total_discount}}</td>
+        </tr>
+    </tbody>
+</table>

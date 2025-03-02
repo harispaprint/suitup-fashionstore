@@ -1,7 +1,7 @@
 from django.shortcuts import render,get_object_or_404,redirect
 from orders.models import OrderProduct
 from store.utils import get_product_stock, get_search_key
-from store.models import Product,ProductImage, ReviewsRatings, Variation, VariationCategory
+from store.models import Product,ProductImage, ReviewsRatings, Variation, VariationCategory, Wishlist
 from category.models import Category
 from .forms import AddProductForm, ReviewForm
 from django.contrib import messages
@@ -11,6 +11,8 @@ from django.http import HttpResponse
 from django.db.models import Q
 from django.http import JsonResponse
 from django.core.paginator import Paginator
+from django.contrib.auth.decorators import login_required
+from accounts.views import login
 
 # Create your views here.
 def store(request,category_slug=None):
@@ -50,10 +52,16 @@ def product_detail(request, category_slug, product_slug):
         # Group variations by category
         grouped_variations = {}
         for variation in variations:
-            category = variation.variation_category.name  # Assuming you use VariationCategory as a foreign key
+            category = variation.variation_category.name  # Assuming VariationCategory is a foreign key
+            
             if category not in grouped_variations:
                 grouped_variations[category] = []
-            grouped_variations[category].append(variation.variation_value)
+
+            # Append both ID and value as a dictionary
+            grouped_variations[category].append({
+                'id': variation.id,
+                'value': variation.variation_value
+            })
 
     except Product.DoesNotExist:
         # Handle product not found
@@ -89,7 +97,6 @@ def product_detail(request, category_slug, product_slug):
 def delete_product(request,product_id):
     product = get_object_or_404(Product,id=product_id)
     product.delete()
-    print('product deleted')
     return redirect('product_management')
 
 
@@ -135,13 +142,12 @@ def check_stock(request,product_id):
     stock_info = False
     product_price=0
     if request.method == "GET":
-        # print(f" this is request.get {request.GET}")
         product = Product.objects.get(id=product_id)
         # variations = ", ".join([f"{key}: {str(request.GET.get(key))}" for key in request.GET])
         search_key = get_search_key(product,request)
+        print(search_key)
         try:
             stock = get_product_stock(search_key)
-            # print(stock)
             stock_count = stock.product_stock
             product_price = stock.price
             stock_info = True
@@ -181,3 +187,32 @@ def review_submit(request,product_id):
             review_data.save()
             messages.success(request,'Thanks for your valauble review of the product')
     return redirect(url)
+
+@login_required(login_url = login)
+
+def wishlist(request):
+    current_user = request.user
+    wishlist = Wishlist.objects.filter(user=current_user)
+    context = {
+        'wishlist' : wishlist,
+    }
+    return render(request,'store/wishlist.html',context)
+
+@login_required(login_url = login)
+def update_wishlist(request,product_id):
+    url = request.META.get('HTTP_REFERER')
+    current_user = request.user
+    product = Product.objects.get(id=product_id)
+    try:
+         wishlist = Wishlist.objects.get(user=current_user,product=product)
+         wishlist.delete()
+    except Wishlist.DoesNotExist:
+         wishlist = Wishlist.objects.create(user=current_user,product=product)
+    return redirect(url)
+    
+def remove_wishlist(request,product_id):
+    current_user = request.user
+    product = Product.objects.get(id=product_id)
+    wishlist = Wishlist.objects.get(user=current_user,product=product)
+    wishlist.delete()
+    return redirect('wishlist')

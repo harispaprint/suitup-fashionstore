@@ -2,6 +2,10 @@
 {% load static %}
 
 {% block content %}
+<style>
+   
+    
+</style>
 <!-- ========================= SECTION PAGETOP ========================= -->
 <section class="section-pagetop bg">
     <div class="container d-flex justify-content-between">
@@ -95,27 +99,27 @@
                     <div class="form-row">
                     <div class="form-group col-md-6">
                       <label>Min</label>
-                      <!-- <input class="form-control" placeholder="$0" type="number"> -->
+                      <!-- <input class="form-control" placeholder="₹0" type="number"> -->
                           <select class="mr-2 form-control">
-                            <option value="0">$0</option>
-                            <option value="50">$50</option>
-                            <option value="100">$100</option>
-                            <option value="150">$150</option>
-                            <option value="200">$200</option>
-                            <option value="500">$500</option>
-                            <option value="1000">$1000</option>
+                            <option value="0">₹0</option>
+                            <option value="50">₹50</option>
+                            <option value="100">₹100</option>
+                            <option value="150">₹150</option>
+                            <option value="200">₹200</option>
+                            <option value="500">₹500</option>
+                            <option value="1000">₹1000</option>
                         </select>
                     </div>
                     <div class="form-group text-right col-md-6">
                       <label>Max</label>
                           <select class="mr-2 form-control">
-                            <option value="50">$50</option>
-                            <option value="100">$100</option>
-                            <option value="150">$150</option>
-                            <option value="200">$200</option>
-                            <option value="500">$500</option>
-                            <option value="1000">$1000</option>
-                            <option value="2000">$2000+</option>
+                            <option value="50">₹50</option>
+                            <option value="100">₹100</option>
+                            <option value="150">₹150</option>
+                            <option value="200">₹200</option>
+                            <option value="500">₹500</option>
+                            <option value="1000">₹1000</option>
+                            <option value="2000">₹2000+</option>
                         </select>
                     </div>
                     </div> <!-- form-row.// -->
@@ -140,19 +144,29 @@
        {% for product in products  %}
         <div class="col-md-4">
             <figure class="card card-product-grid p-1">
-                <div class="img-wrap"> 
-                    <a href="{{product.get_url}}" class="img-wrap"> <img src="{{product.images.url}}"> </a>
-                    
-                </div> <!-- img-wrap.// -->
+                <div class="img-wrap position-relative">
+                    <!-- Heart Icon -->
+                    <a href="{% url 'update_wishlist' product.id %}" class="position-absolute wishlist-icon">
+                        <div class="icon icon-sm">
+                            <i class="fas fa-heart {% if product.whishlist_product.exists %}text-danger{% else %}text-muted{% endif %}"></i>
+                </div>
+                    <!-- Image -->
+                    <a href="{{product.get_url}}" class="img-wrap">
+                        <img src="{{product.images.url}}" alt="Product Image" class="img-fluid">
+                    </a>
+                </div>
+                
                 <figcaption class="info-wrap">
                     <div class="fix-height">
                         <a href="{{product.get_url}}" class="title">{{product.product_name}}</a>
                         <div class="price-wrap mt-2">
-                            <span class="price">${{product.price}}</span>
+                            <span class="price">₹{{product.price}}</span>
  
                         </div> <!-- price-wrap.// -->
                     </div>
-                    {% comment %} <a href="{% url "add_cart" product.id %}" class="btn btn-block btn-primary">Add to cart </a> {% endcomment %}
+
+                    
+                 </di>
                 </figcaption>
             </figure>
         </div> <!-- col.// -->

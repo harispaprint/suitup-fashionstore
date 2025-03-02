@@ -59,3 +59,13 @@
     height: 80px;
     border: 1px solid grey;
   }
+
+  .date-input {
+    display: inline-block;
+    visibility: visible;
+    width: 100%; /* Or desired width */
+  }
+
+  .offset-sale {
+    margin-left: 4.5%;
+  }

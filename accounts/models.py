@@ -1,5 +1,7 @@
+from decimal import Decimal
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser,BaseUserManager
+
 # Create your models here.
 
 class MyAccountManger(BaseUserManager):
@@ -99,6 +101,7 @@ class UserAddresses(models.Model):
     city = models.CharField(blank=True, max_length=20)
     state = models.CharField(blank=True, max_length=20)
     country = models.CharField(blank=True, max_length=20)
+    pincode = models.CharField(max_length=6,null=True,blank=True)
     is_default = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
@@ -121,5 +124,6 @@ class UserAddresses(models.Model):
 #     otp = models.CharField(max_length=6)
 #     created_at = models.DateTimeField(auto_now_add=True)
 #     expires_at = models.DateTimeField()
+
 
 

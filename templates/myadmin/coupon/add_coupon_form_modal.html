@@ -1,0 +1,41 @@
+<!-- Return Modal starts -->
+<button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addCouponModal">
+    Add Coupon
+  </button>
+  <div class="modal fade" id="addCouponModal" tabindex="-1" role="dialog" aria-labelledby="addCouponModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div class="col">
+            <h6 class="modal-title" id="addCouponModal">
+              <strong>Add New Coupon</strong>
+            </h6>
+                 
+          </div>
+          <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          
+           <!-- Update return Form -->
+           <form action="{% url 'add_coupon' %}" method="post">
+              {% csrf_token %}
+              <label for="coupon_code"><b>Coupon Code</b></label>
+              {{coupon_form.coupon_code}}
+                <br>
+              <label for="coupon_description"><b>Coupon Description</b></label>
+              {{coupon_form.coupon_description}}
+
+              <label for="coupon_discount">Coupon discount</label>
+              {{coupon_form.coupon_discount}}
+              <button type="submit" class="btn btn-success btn-sm">Update</button>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+    <!-- Ends Modal ends --> 

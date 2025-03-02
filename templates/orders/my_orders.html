@@ -1,0 +1,246 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+
+<section class="section-conten padding-y bg">
+
+{% include 'includes/alerts.html' %}
+<div class="container">
+	<div class="row">
+	{% include 'includes/dashboard_sidebar.html' %}
+	<main class="col-md-9">
+		<header class="card-header">
+			<h4><strong class="d-inline-block mr-3">Your order history</strong></h4>
+		</header>
+		<div class="row justify-content-between p-4">
+			<a class="list-group-item {% if '/all/' in request.path %}active{% endif %}" href="{% url 'my_orders' status='all' %}"> All </a>
+			<a class="list-group-item {% if '/confirmed/' in request.path %}active{% endif %}" href="{% url 'my_orders' status='confirmed' %}"> Confirmed </a>
+			<a class="list-group-item {% if '/shipped/' in request.path %}active{% endif %}" href="{% url 'my_orders' status='shipped' %}"> Shipped </a>
+			<a class="list-group-item {% if '/delivered/' in request.path %}active{% endif %}" href="{% url 'my_orders' status='delivered' %}"> Delivered </a>
+			<a class="list-group-item {% if '/returned/' in request.path %}active{% endif %}" href="{% url 'my_orders' status='returned' %}"> Returned </a>
+			<a class="list-group-item {% if '/cancelled/' in request.path %}active{% endif %}" href="{% url 'my_orders' status='cancelled' %}"> Cancelled </a>
+			<a class="list-group-item {% if '/pending/' in request.path %}active{% endif %}" href="{% url 'my_orders' status='pending' %}"> Pending Transactions </a>
+	
+			<div></div>
+			<div></div>
+		</div>
+		{% for order in orders %}
+		{% if order.status_count > 0 %}
+		<article class="card">
+		<div class="card-body">
+			<div class="row">
+			<div class="col-md-12">
+				<div class="table-responsive container">
+					<table class="table">
+						<div class="row justify-content-between">
+							<h6 class="text-left"> Order : <a href="{% url 'order_detail' order.order_number %}" >{{order.order_number}}</a></h6>
+							<h6 class="text-left">Payment : {{order.payment_mode}}</h6>
+							<h6 class="text-left">{{order.created_at}}</h6>
+						</div>
+						<div class="row justify-content-between">
+							<h6 class="text-left">Total Amount - ₹ {{order.grand_order_total}}</h6>
+							{% if '/pending/' in request.path %}
+							<a href="{% url "retry_failed_payment" order.id %}" class="btn-sm btn-info">Retry Payment</a>
+							{% elif '/cancelled/' in request.path or '/returned/' in request.path %}
+							<a href=""></a>
+							{% else %}
+							<a href="{% url "generate_invoice_pdf" order.id %}" class="btn-sm btn-info">Download Invoice</a>
+							{% endif %}
+						</div>
+						
+						<thead>
+							<tr>
+							<th scope="col" class="text-left m">Product</th>
+							<th scope="col">Quantity</th>
+							<th scope="col">Price</th>
+							<th scope="col">Total Price</th>
+							<th scope="col">Status</th>
+							<th scope="col">Action</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for order_product in order.order_products.all %}	
+							{% if order_product.status|lower == status|lower or status|lower == 'all' %}
+							<tr class="align-middle text-center">
+								<td>
+								  <div class="d-flex align-items-center">
+									<img src="{{ order_product.product.images.url }}" class="img-fluid rounded" style="max-width: 60px;">
+									<div class="ms-3 small w-50">{{order_product.product}}</div>
+								  </div>
+								</td>
+								<td class="align-middle">{{ order_product.quantity }}</td>
+								<td class="align-middle"> {{ order_product.product_price }}</td>
+								<td class="align-middle"> {{ order_product.total_price }}</td>
+								<td class="align-middle">{{ order_product.status }}</td>
+								<td class="text-center align-middle"> <!-- Ensures the button is centered -->
+									
+									{% if  order_product.status != 'returned' %}
+									<select name="change_status" id="change_status_{{ order_product.product_price.id }}" data-order-product-id="{{ order_product.id }}" required class="form-select change-status">
+										<option value="" disabled selected>Select</option>
+										{% if order_product.status == 'confirmed' %}
+										<option value="cancel">Cancel</option>
+										{% endif %}
+										{% if order_product.status == 'delivered' %}
+										<option value="return">Return</option>
+										{% endif %}
+									</select>
+									{% endif %}
+									{% for return_item in order_product.order_return.all %}
+										{% if return_item.status == 'approved' %}
+											<small>Eligible for refund</small>
+											<a href="{% url 'order_product_refund' order_product.id %}" class="btn btn-success btn-sm">Transfer refund</a>
+										{% endif %}
+									{% endfor %}
+									
+								</td>
+							  </tr>
+								
+								<!-- Modal -->
+								<div class="modal fade" id="returnModal{{order_product.id}}" tabindex="-1" role="dialog" aria-labelledby="returnModalLabel{{order_product.id}}" aria-hidden="true">
+									<div class="modal-dialog" role="document">
+									<div class="modal-content">
+										<div class="modal-header d-flex flex-column text-left">
+												<h5 class="modal-title" id="returnModal{{order_product.id}}">Return Request</h5>
+												<h6>Product Name: {{order_product.product}}</h6>
+										</div>
+										
+										<div class="modal-body">
+										<form action="{% url "product_return_request" order_product.id %}" method="post">
+											{% csrf_token %}
+											<div class="mb-3 text-left">
+												<label for="" class="form-label">Reason</label>
+												<select
+													class="form-select form-control form-select-lg" name="reason" id="reason" required>
+													<option selected>Select one</option>
+													<option value="damaged">Damaged or Defective Product</option>
+													<option value="wrong_product">Wrong Product Delivered</option>
+													<option value="size_issue">Size or Fit Issues</option>
+													<option value="not_as_described">Product Not as Described</option>
+													<option value="missing_items">Missing Items</option>
+													<option value="quality_issue">Quality Issues</option>
+													<option value="performance_issue">Performance Issues</option>
+													<option value="expired_product">Expired Product</option>
+													<option value="change_of_mind">Change of Mind</option>
+													<option value="better_price">Better Price Available</option>
+													<option value="tampered_package">Package Tampered</option>
+												</select>
+											</div>
+											
+											<div class="mb-3 text-left">
+												<label for="" class="form-label">Description</label>
+												<textarea class="form-control" name="description" id="description" rows="3"></textarea>
+											</div>
+											<button
+												type="submit"
+												class="btn btn-primary"
+											>
+												Submit
+											</button>
+											
+										</form>
+
+										</div>
+									</div>
+									</div>
+								</div>
+
+								<!-- Modal -->
+								<div class="modal fade" id="cancelModal{{order_product.id}}" tabindex="-1" role="dialog" aria-labelledby="cancelModalLabel{{order_product.id}}" aria-hidden="true">
+									<div class="modal-dialog" role="document">
+									<div class="modal-content">
+										<div class="modal-header d-flex flex-column text-left">
+												<h5 class="modal-title" id="cancelModal{{order_product.id}}">Cancel Request</h5>
+												<h6>Product Name: {{order_product.product}}</h6>
+										</div>
+										
+										<div class="modal-body">
+										<form action="{% url "product_cancel_request" order_product.id %}" method="post">
+											{% csrf_token %}
+											<div class="mb-3 text-left">
+												<label for="" class="form-label">Reason</label>
+												<select
+													class="form-select form-control form-select-lg" name="reason" id="reason" required>
+													<option value="changed_mind">Changed My Mind</option>
+													<option value="ordered_by_mistake">Ordered by Mistake</option>
+													<option value="better_price">Found a Better Price</option>
+													<option value="delay_in_shipping">Shipping Delays</option>
+													<option value="address_issue">Incorrect Address Provided</option>
+													<option value="payment_issue">Payment Issues</option>
+													<option value="fraud_suspicion">Suspicion of Fraud</option>
+													<option value="out_of_stock">Item Out of Stock</option>
+													<option value="duplicate_order">Duplicate Order</option>
+													<option value="no_longer_needed">No Longer Needed</option>
+													<option value="personal_emergency">Personal Emergency</option>
+													<option value="seller_request">Cancellation Requested by Seller</option>
+													<option value="technical_issue">Technical Issues with Order</option>
+												</select>
+											</div>
+											
+											<div class="mb-3 text-left">
+												<label for="" class="form-label">Description</label>
+												<textarea class="form-control" name="description" id="description" rows="3"></textarea>
+											</div>
+											<button
+												type="submit"
+												class="btn btn-primary"
+											>
+												Submit
+											</button>
+											
+										</form>
+
+										</div>
+									</div>
+									</div>
+								</div>
+								
+
+							  {% endif %}
+							{% endfor %}
+						</tbody>
+				</table>
+			</div>
+			
+			</div>
+
+			</div> <!-- row.// -->
+		</div> <!-- card-body .// -->
+
+		</article> <!-- order-group.// -->
+		<br>
+		{% endif %}
+		{% endfor %}
+	</main>
+</div> <!-- row.// -->
+</div>
+</section>
+
+  <!-- Script to handle all dropdowns -->
+  <script>
+	document.querySelectorAll('.change-status').forEach(function (dropdown) {
+	  dropdown.addEventListener('change', function (event) {
+		if (event.target.value === 'return') {
+			const orderProductId = event.target.getAttribute('data-order-product-id');
+			const modalId = `#returnModal${orderProductId}`;
+		  // Trigger the modal programmatically
+		  $(modalId).modal('show');
+		}
+		if (event.target.value === 'cancel') {
+			const orderProductId = event.target.getAttribute('data-order-product-id');
+			const modalId = `#cancelModal${orderProductId}`;
+		  // Trigger the modal programmatically
+		  $(modalId).modal('show');
+		}
+	  });
+	});
+
+	{% comment %} const modal = document.getElementById('exampleModal');
+    modal.addEventListener('hidden.bs.modal', () => {
+        location.reload(); // Refresh the page
+    }); {% endcomment %}
+  </script>
+  
+
+
+{% endblock %}

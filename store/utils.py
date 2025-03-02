@@ -1,30 +1,34 @@
 from store.models import Product, Stock
 
-def get_search_key(product,request):
+# def get_search_key(product,request):
+#     search_key = None
+#     if request.method == "GET":
+#         variations = ", ".join([f"{key}{str(request.GET.get(key))}" for key in request.GET])
+#         search_key = f"{product.product_name}{variations}"
+#     elif request.method == "POST":
+#         variations = ", ".join([f"{key}{value}" for key, value in request.POST.items() if key != 'csrfmiddlewaretoken'])
+#         search_key = f"{product.product_name}{variations}"
+#         print(search_key)
+#     return search_key
+
+def get_search_key(product, request):
     search_key = None
     if request.method == "GET":
-        print(f" this is request.get {request.GET}")
-        variations = ", ".join([f"{key}{str(request.GET.get(key))}" for key in request.GET])
-        search_key = f"{product.product_name}{variations}"
-        print(f"Search - {search_key}")
+        variation_ids = "-".join([str(request.GET.get(key)) for key in request.GET if request.GET.get(key)])
+        search_key = f"{product.id}-{variation_ids}" if variation_ids else str(product.id)
     elif request.method == "POST":
-        print(f" this is request.post {request.POST}")
-        variations = ", ".join([f"{key}{value}" for key, value in request.POST.items() if key != 'csrfmiddlewaretoken'])
-        search_key = f"{product.product_name}{variations}"
-        print(f"Search - {search_key}")
+        variation_ids = "-".join([str(value) for key, value in request.POST.items() if key != 'csrfmiddlewaretoken' and value.isdigit()])
+        search_key = f"{product.id}-{variation_ids}" if variation_ids else str(product.id)
     return search_key
 
 def get_product_stock(search_key):
-    print('get_product_stock')
     try:
         specific_stock = Stock.objects.get(search_key__iexact=search_key)
         return specific_stock
         # return [specific_stock.product_stock,specific_stock.price]
     except Stock.DoesNotExist:
-        print("No stock found.")
         return 0
     except Stock.MultipleObjectsReturned:
-        print("Multiple stock records found for the given key.")
         return 0
     
 def update_stock(request,product,variation_combo_value,new_stock):

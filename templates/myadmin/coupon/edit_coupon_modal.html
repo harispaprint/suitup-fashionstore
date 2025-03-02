@@ -1,0 +1,54 @@
+<button type="button" class="btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#testModal{{coupon.id}}">
+    Check Coupon
+  </button>
+<!-- Modal -->
+<div class="modal fade" id="testModal{{ coupon.id }}" tabindex="-1" role="dialog" aria-labelledby="testModalLabel{{ coupon.id }}" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h6 class="modal-title" id="testModalLabel{{ coupon.id }}">{{ coupon.coupon_name }}</h6>
+          <button type="bucd tton" class="close" data-bs-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <table class="table">
+            <thead class="thead-dark">
+              <tr>
+                <th scope="col">Coupon Code</th>
+                <th scope="col">Curent Discount</th>
+                <th scope="col">Update Discount</th>
+              </tr>
+            </thead>
+            <tbody>
+             
+                <tr>
+                  <td>{{ coupon.coupon_code }}</td>
+                  <td>{{ coupon.coupon_discount }}%</td>
+                  <td>
+                    <!-- Input field and Update button for stock -->
+                    {% comment %} <form method="POST" action="{% url 'update_product_stock' i.id %}"> {% endcomment %}
+                      {% csrf_token %}
+                      <input type="number" name="new_stock" class="form-control" style="width: 70px; display: inline;" min="0" >
+                      <button type="submit" class="btn btn-success btn-sm">Update</button>
+                    </form>
+                  </td>
+                  <td>
+                    <form method="POST" action="{% url 'delete_coupon' coupon.id %}" onsubmit="return confirmCouponDelete()">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                  </form>
+                  </td>
+                  
+                 
+                </tr>
+           
+            </tbody>
+          </table>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>

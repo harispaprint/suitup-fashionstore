@@ -25,11 +25,11 @@
             <td>{{user.status}}</td>
             <td>
             {% if user.is_active  %}
-            <a href="{% url "deactivate_user" user.id %}" class="btn btn-warning">Deactivate</a>
+            <a href="{% url "deactivate_user" user.id %}" class="btn-sm btn-warning">Deactivate</a>
             {% else %}
-            <a href="{% url "activate_user" user.id %}" class="btn btn-success">Activate</a>
+            <a href="{% url "activate_user" user.id %}" class="btn-sm btn-success">Activate</a>
             {% endif %}
-            <a href="{% url "delete_user" user.id %}" class="btn btn-danger">Delete</a>
+            <a href="{% url "delete_user" user.id %}" class="btn-sm btn-danger">Delete</a>
           </td>
           </tr>
           {% endfor %}

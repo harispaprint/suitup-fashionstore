@@ -375,6 +375,15 @@ article:after,
   color: #212529;
 }
 
+.text-truncate-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  box-orient: vertical;
+  overflow: hidden;
+}
+
 .title-page {
   color: #212529;
 }
@@ -1679,3 +1688,24 @@ a[class*=card]:hover .title {
 .container_addresses {
   display: flex;
 }
+
+.img-wrap {
+  position: relative; /* Ensures the heart icon is positioned relative to this container */
+  display: inline-block; /* Keeps the image and icon in a proper layout */
+}
+
+.wishlist-icon {
+  right: 10px; /* Adjust to position the icon horizontally */
+  z-index: 10; /* Ensures the icon is above the image */
+  background-color: rgba(255, 255, 255, 0.8); /* Optional: Add a semi-transparent background */
+  border-radius: 50%; /* Makes the icon background circular */
+  padding: 5px; /* Adds spacing around the icon */
+  text-align: center; /* Centers the icon inside */
+}
+
+.img-wrap img {
+  display: block; /* Ensures the image fills the container properly */
+  width: 100%; /* Makes the image responsive */
+  height: auto; /* Maintains aspect ratio */
+}
+

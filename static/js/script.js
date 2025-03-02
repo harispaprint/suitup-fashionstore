@@ -2,45 +2,62 @@
 
 // jQuery ready start
 $(document).ready(function () {
-    // Listen for changes in color or size
-    $('#color-select, #size-select').change(function () {
-        const color = $('#color-select').val();
-        const size = $('#size-select').val();
-    
-        // Only send AJAX if both values are selected
-        if (color && size) {
-        $.ajax({
-            url: checkStockUrl,
-            type: "GET",
-            data: {
-            color: color,
-            size: size,
-            },
-            success: function (response) {
-            // Update stock status
-            $('#stock-status').html(response.stock_status);
-    
-            // Update add-to-cart button
-            if (response.can_add_to_cart) {
-                $('#add-cart-button').html(`
-                <button type="submit" class="btn btn-primary">
-                    <span class="text">Add to cart</span>
-                    <i class="fas fa-shopping-cart"></i>
-                </button>
-                `);
-            } else {
-                $('#add-cart-button').html(`
-                <h5 class="text-danger">Out of Stock</h5>
-                `);
-            }
-            },
-            error: function (xhr, status, error) {
-            console.error("Error:", error);
-            },
-        });
+  const allDropdowns = $('select'); // Cache all dropdowns
+  
+  function checkStock() {
+    // Check if any dropdown is empty
+    const hasEmptyDropdown = allDropdowns.toArray().some(dropdown => !$(dropdown).val());
+
+    if (hasEmptyDropdown) {
+      return; // Stop if any dropdown is empty
+    }
+
+    // Collect values only if all dropdowns are filled
+    const selectedValues = {};
+    allDropdowns.each(function () {
+      selectedValues[$(this).attr('id')] = $(this).val();
+    });
+
+    $.ajax({
+      url: checkStockUrl,
+      type: "GET",
+      data: selectedValues,
+      success: function (response) {
+        $('#stock-status').html(response.stock_status);
+        
+        if (response.can_add_to_cart) {
+          $('#add-cart-button').html(`
+            <button type="submit" class="btn btn-primary">
+              <span class="text">Add to cart</span>
+              <i class="fas fa-shopping-cart"></i>
+            </button>
+          `);
+          let price = response.product_price.replace('$', ''); // Remove $ if present
+          $('#product-price').html(`
+            <h4 class="price">₹${price}</h4>
+          `);
+        } else {
+          $('#add-cart-button').html(`
+            <h5 class="text-info">Try after some time</h5>
+          `);
+          $('#product-price').html(`
+            <h4 class="price">No Price info</h4>
+          `);
         }
+      },
+      error: function (xhr, status, error) {
+        console.error("Error:", error);
+      }
     });
-    });
+  }
+// Call checkStock on dropdown change
+allDropdowns.change(checkStock);
+
+  // Initial check if all dropdowns have default values
+if (!allDropdowns.toArray().some(dropdown => !$(dropdown).val())) {
+  checkStock();
+}
+});
 
 
 $(document).ready(function () {

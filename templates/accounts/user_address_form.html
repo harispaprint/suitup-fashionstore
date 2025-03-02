@@ -89,6 +89,15 @@
 								</div>
 							{% endif %}
 						</div>
+						<div class="form-group col-md-4">
+							<label>Pincode</label>
+							{{ address_form.pincode }}
+							{% if address_form.pincode.errors %}
+								<div class="text-danger">
+									{{ address_form.pincode.errors|striptags }}
+								</div>
+							{% endif %}
+						</div>
 					</div>
 					<input type="submit" value="Save" class="btn btn-primary">
 				</form>

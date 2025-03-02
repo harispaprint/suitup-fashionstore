@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+
+<section class="section-conten padding-y bg">
+
+{% include 'includes/alerts.html' %}
+<div class="container">
+	<div class="row">
+	{% include 'includes/dashboard_sidebar.html' %}
+	<main class="col-md-9">
+		<header class="card-header text-white" style="background-color:#008080">
+			<h4><strong class="d-inline-block mr-3">Wishlist</strong></h4>
+		</header>
+		<br>
+		{% if not wishlist %}
+        <h2 class="text-center">Your Wishlist is empty</h2>
+        <div class="text-center"><a href="{% url "store" %}" class="btn btn-primary">Continue Shopping</a></div>
+    	{% else %}
+		{% for list in wishlist %}
+		<article class="card">	
+			<div class="row">
+				<div class="col-md-12">
+					<div class="table-responsive container">
+						<div class="d-flex align-items-center">
+							<a href="{{list.product.get_url}}" class="img-wrap"><img src="{{ list.product.images.url }}" class="img-fluid rounded" style="max-width: 120px;"></a>
+							<div class="col flex-start">
+								<div class="ms-3 w-50 text-left">{{ list.product }}</div>
+								<div class="rating-star text-left">
+									<span>
+									<i class="fa fa-star{% if list.product.avg_rating < 0.5 %}-o{% elif list.product.avg_rating >= 0.5 and list.product.avg_rating < 1 %}-half-o {% endif %}" aria-hidden="true"></i>
+									<i class="fa fa-star{% if list.product.avg_rating < 1.5 %}-o{% elif list.product.avg_rating >= 1.5 and list.product.avg_rating < 2 %}-half-o {% endif %}" aria-hidden="true"></i>
+									<i class="fa fa-star{% if list.product.avg_rating < 2.5 %}-o{% elif list.product.avg_rating >= 2.5 and list.product.avg_rating < 3 %}-half-o {% endif %}" aria-hidden="true"></i>
+									<i class="fa fa-star{% if list.product.avg_rating < 3.5 %}-o{% elif list.product.avg_rating >= 3.5 and list.product.avg_rating < 4 %}-half-o {% endif %}" aria-hidden="true"></i>
+									<i class="fa fa-star{% if list.product.avg_rating < 4.5 %}-o{% elif list.product.avg_rating >= 4.5 and list.product.avg_rating < 5 %}-half-o {% endif %}" aria-hidden="true"></i>
+									</span>
+								</div>
+								<h4 class="text-left">₹{{ list.product.price }}</h4>
+								
+							</div>
+							<a href= "{{list.product.get_url}}"  class="widget-header pl-3 ml-3">
+								<div class="icon icon-sm"><i class="fa fa-shopping-cart"></i></div>
+							</a>
+							<a href="{% url "remove_wishlist" list.product.id %}" class="widget-header pl-3 ml-3 text-right">
+								<div class="icon icon-sm"><i class="fa-solid fa-trash"></i></div>
+							</a>
+						</div>
+			
+					</div>
+				</div>
+			</div> <!-- row.// -->
+		</article> <!-- order-group.// -->
+		<br>
+		{% endfor %}
+		{% endif %}
+	</main>
+</div> <!-- row.// -->
+</div>
+
+
+</section>
+
+{% endblock %}

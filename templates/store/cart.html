@@ -47,30 +47,30 @@
                         <div class="col"> 
                             <div class="input-group input-spinner">
                                 <div class="input-group-prepend">
-                                    <a href={% url "remove_cart" cart_item.product.id cart_item.id %} class="btn btn-light" type="button" id="button-plus"> <i class="fa fa-minus"></i> </a>
+                                    <a href="#" data-url="{% url 'reduce_cart' cart_item.product.id cart_item.id %}" data-cart-id="{{ cart_item.id }}" class="btn btn-light change-cart" style="height:2em" type="button" id="button-plus">
+                                        <i class="fa fa-minus"></i>
+                                    </a>
                                 </div>
-                                    <input type="text" class="form-control"  value="{{cart_item.quantity}}"readonly>
+                                <input type="text" class="form-control" style="height:1.85em" value="{{cart_item.quantity}}" readonly data-cart-id="{{cart_item.id}}">
                                 <div class="input-group-append">
-                                    <form action="{% url "add_cart" cart_item.product.id %}" method="POST">
-                                        {% csrf_token %}
-                                        {% for item in cart_item.stock.variation_combo.all %}
-                                            <input type="hidden" name="{{item.variation_category | capfirst}}" value="{{item.variation_value | capfirst}}">
-                                        {% endfor %}
-                                        <button class="btn btn-light" type="submit" id="button-minus"> <i class="fa fa-plus"></i> </button>
-                                    </form>
+                                    <a href="#" data-url="{% url 'increase_cart' cart_item.product.id cart_item.id %}" data-cart-id="{{ cart_item.id }}" class="btn btn-light change-cart" style="height:2em" type="button" id="button-plus">
+                                        <i class="fa fa-plus"></i>
+                                    </a>
                                 </div>
                             </div> <!-- input-group.// -->
                         </div> <!-- col.// -->
                     </td>
                     <td> 
                         <div class="price-wrap"> 
-                            <var class="price">${{cart_item.d_item_price}}</var> 
-                            <p class="text-muted"> <s>${{cart_item.stock.price}}</s> </p> 
+                            <var class="price" data-cart-id1="{{ cart_item.id }}">₹ {{ cart_item.d_item_price }}</var>
+                            {% if cart_item.product.bulk_offer_product.all %}
+                            <p class="text-muted"> <s>₹{{cart_item.stock.price}}</s> </p>
+                            {% endif %} 
                         </div> <!-- price-wrap .// -->
                     </td>
                     <td> 
                         <div class="price-wrap"> 
-                            <var class="price">{{cart_item.discount}}%</var> 
+                            <var class="price" data-cart-id2="{{ cart_item.id }}">{{cart_item.discount}}%</var> 
                         </div> <!-- discount-wrap .// -->
                     </td>
                     <td class="text-right"> 
@@ -80,7 +80,13 @@
                 <tr>
                     <td>
                         {% if cart_item.product.bulk_offer_product.all %}
-                            <p>Discount info : Available</p>
+                        {% for offer in cart_item.product.bulk_offer_product.all %}
+                        {% if offer.is_fixed %}
+                            <small>Discount info : "Purchase a minimum of <b>{{offer.min_qty}}</b> items to enjoy a <b>{{offer.fixed_discount}}%</b> discount."</small>
+                        {% else %}
+                            <small>Discount info : "Purchase at least {{offer.min_qty}} items to enjoy a {{offer.fixed_discount}}% incremental discount."</small>
+                        {% endif %}
+                        {% endfor %}
                         {% else %}
                             <p>Discount info : not Available</p>
                         {% endif %}
@@ -99,26 +105,27 @@
             <div class="card">
             <div class="card-body">
                 <dl class="dlist-align">
-                  <dt>Total price:</dt>
-                  <dd class="text-right">${{total}}</dd>
+                    <dt>Sub Total :</dt>
+                    <dd id="sub-total" class="text-right">₹{{ sub_total }}</dd>
                 </dl>
+                
                 <dl class="dlist-align">
                   <dt>Tax:</dt>
-                  <dd class="text-right"> ${{tax}}</dd>
+                  <dd id="tax" class="text-right"> ₹{{tax}}</dd>
                 </dl>
                 <dl class="dlist-align">
                   <dt>Grand Total:</dt>
-                  <dd class="text-right text-dark b"><strong>${{grand_total}}</strong></dd>
+                  <dd id="grand-total" class="text-right text-dark b"><strong>₹{{grand_total}}</strong></dd>
                 </dl>
                 <dl class="dlist-align">
                     <dt>Your Total Savings:</dt>
-                    <dd class="text-right text-dark b"><strong>${{total_savings}}</strong></dd>
+                    <dd id="total-savings" class="text-right text-dark b"><strong>₹{{total_savings}}</strong></dd>
                   </dl>
                 <hr>
                 <p class="text-center mb-3">
                     <img src="{% static "/images/misc/payments.png" %}" height="26">
                 </p>
-                <a href="{% url "checkout" %}" class="btn btn-primary btn-block"> Checkout </a>
+                <a href="{% url 'checkout' cart.id %}" class="btn btn-primary btn-block"> Checkout </a>
                 <a href="{% url "store" %}" class="btn btn-light btn-block">Continue Shopping</a>
             </div> <!-- card-body.// -->
             </div> <!-- card.// -->
@@ -134,5 +141,95 @@
     </section>
     <!-- ========================= SECTION CONTENT END// ========================= -->
 
+    <!-- Add jQuery CDN before your script -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+
+            $(".change-cart").click(function(event) {
+                event.preventDefault();  // Prevent default link action
+
+                let url = $(this).data("url");  // Get the reduce_cart URL
+                let cartItemId = $(this).data("cart-id");  // Get cart_item ID
+                console.log("Fetching variations for Product ID:", cartItemId);
+
+                $.ajax({
+                    type: "GET",
+                    url: url,
+                    headers: { "X-Requested-With": "XMLHttpRequest" },  // Indicate AJAX request
+                    success: function(response) {
+                        if (response.status === "success") {
+                            // Fetch the latest cart data
+                            updateCartData(cartItemId);
+                        }
+                    },
+                    error: function(xhr, status, error){
+                        console.error(xhr.responseText);
+                    }
+                });
+            });
+
+            // Function to fetch updated cart data
+            function updateCartData(cartItemId) {
+            $.ajax({
+                type: "GET",
+                url: "{% url 'cart' %}",  // Fetch cart data
+                data: { cartItemId: cartItemId },  // Send cartItemId to the view
+                headers: { "X-Requested-With": "XMLHttpRequest" }, // Tell Django it's an AJAX request
+                success: function(response) {
+                    const cartId = cartItemId;
+                    const newQuantity = response.cart_quantity
+                    const d_item_price = response.d_item_price
+                    const discount = response.discount
+                    if (newQuantity === 0) {
+                        // Reload the page if quantity is 0
+                        location.reload();
+                    }
+
+                    // Find the input element with the matching data-cart-id
+                    const inputElement = document.querySelector(`input[data-cart-id="${cartId}"]`);
+                   
+                    const priceElement = document.querySelector(`.price[data-cart-id1="${cartId}"]`);
+                    const discountElement = document.querySelector(`.price[data-cart-id2="${cartId}"]`);
+
+                    if (inputElement) {
+                        // Update the value of the input
+                        inputElement.value = newQuantity;
+                    }
+                    else {
+                        console.error(`No cart item found with ID ${cartId}`);
+                    }
+                    if (priceElement) {
+                        // Update the value of the input
+                        priceElement.innerHTML = `₹ ${d_item_price}`;
+                    }
+                    else {
+                        console.error(`No cart item found with ID ${cartId}`);
+                    }
+                    if (discountElement) {
+                        // Update the value of the input
+                        discountElement.innerHTML = `${discount} % `;
+                    }
+                    else {
+                        console.error(`No cart item found with ID ${cartId}`);
+                    }
+                    $("#cart-count").text(response.quantity); 
+                    $("#sub-total").text("₹" + response.sub_total.toFixed(2));
+                    $("#total-savings").text("₹" + response.total_savings.toFixed(2));
+                    $("#tax").text("₹" + response.tax.toFixed(2));
+                    $("#grand-total").text("₹" + response.grand_total.toFixed(2));
+
+                },
+                error: function(xhr, status, error) {
+                    console.error(xhr.responseText);
+                }
+            });
+                }
+
+        });
+
+        
+    </script>
 {% endblock content %}
 

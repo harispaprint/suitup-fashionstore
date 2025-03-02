@@ -12,6 +12,11 @@
             <img class="logo" src="{% static "./images/admin_icon.png" %}">
             <h4>Admin :  {{user.first_name}}</h4>
           </li>
+
+          <li class="nav-item">
+            <a href="{% url "admin_dashboard" %}" class="btn btn-primary btn-block">Dashboard</a>
+          </li>
+          <br>
           <li class="nav-item">
             <a href="{% url "customer_management" %}" class="btn btn-primary btn-block">Customer Management</a>
           </li>
@@ -27,11 +32,18 @@
           <li class="nav-item">
             <a href="{% url "order_management" %}" class="btn btn-info btn-block">Order Management</a>
           </li>
-          <br>
+
+          <li class="nav-item">
+            <a href="{% url "coupon_management" %}" class="btn btn-info btn-block">Coupon Management</a>
+          </li>
+        
           <li class="nav-item">
             <a href="{% url "inventory_management" %}" class="btn btn-info btn-block">Inventory Management</a>
           </li>
-          <br><br>
+          <li class="nav-item">
+            <a href="{% url "sales_report_filter" %}" class="btn btn-info btn-block">Sales Report</a>
+          </li>
+          
           <li class="nav-item">
             <a href="{% url "admin_logout" %}" class="btn btn-primary btn-block">Logout</a>
           </li>

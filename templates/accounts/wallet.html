@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+
+<section class="section-conten padding-y bg">
+
+{% include 'includes/alerts.html' %}
+<div class="container">
+	<div class="row">
+	{% include 'includes/dashboard_sidebar.html' %}
+	<main class="col-md-9">
+		<header class="card-header row justify-content-between">
+			<h4><strong class="d-inline-block mr-3">Your Wallet</strong></h4>
+			<h5><strong class="d-inline-block mr-3">Balance : {{wallet.wallet_balance}}</strong></h5>
+		</header>
+		<div class="row justify-content-between p-4">
+			<a class="list-group-item {% if '/all/' in request.path %}active{% endif %}" href="{% url 'wallet' status='all' %}"> All Transactions </a>
+			<a class="list-group-item {% if '/credits/' in request.path %}active{% endif %}" href="{% url 'wallet' status='credits' %}"> Credits </a>
+			<a class="list-group-item {% if '/debits/' in request.path %}active{% endif %}" href="{% url 'wallet' status='debits' %}"> Debits </a>
+			{% comment %} <a class="list-group-item {% if '/delivered/' in request.path %}active{% endif %}" href="{% url 'my_orders' status='add_cash' %}"> Add Cash </a>
+	 {% endcomment %}
+		</div>
+		{% for transaction in wallet_transactions %}
+		
+		<article class="card">
+		<div class="card-body">
+			<div class="row">
+			<div class="col-md-12">
+				<div class="table-responsive container">
+					<table class="table">
+						<div class="row justify-content-between">
+							
+						</div>
+						
+						<thead>
+							<tr>
+							<th scope="col" class="text-left m">Product</th>
+							<th scope="col">Amount</th>
+							<th scope="col">Type</th>
+							<th scope="col">Time</th>
+							</tr>
+						</thead>
+						<tbody>
+							
+							
+							<tr class="align-middle text-center">
+								<td>
+								  <div class="d-flex align-items-center">
+									<img src="{{ transaction.order_product.product.images.url }}" class="img-fluid rounded" style="max-width: 60px;">
+									<div class="ms-3 small w-50">{{ transaction.order_product.product }}</div>
+								  </div>
+								</td>
+								<td class="align-middle"> {{transaction.transaction_amount}}</td>
+								<td class="align-middle"> {{transaction.transaction_type}}</td>
+								<td class="align-middle">{{transaction.transaction_time}}</td>
+							  </tr>
+							  
+							  
+						</tbody>
+				</table>
+			</div>
+			
+			</div>
+
+			</div> <!-- row.// -->
+		</div> <!-- card-body .// -->
+
+		</article> <!-- order-group.// -->
+		<br>
+		
+		{% endfor %}
+	</main>
+</div> <!-- row.// -->
+</div>
+
+
+</section>
+
+{% endblock %}

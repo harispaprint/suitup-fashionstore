@@ -13,7 +13,7 @@ class Product(models.Model):
     images          = models.ImageField(upload_to='photos/products')
     stock           = models.IntegerField()
     is_available    = models.BooleanField(default=True)
-    category        = models.ForeignKey(Category,on_delete=models.CASCADE)
+    category        = models.ForeignKey(Category,on_delete=models.CASCADE,related_name="category_product")
     created_date    = models.DateTimeField(auto_now_add=True)
     modified_date   = models.DateTimeField(auto_now=True)
 
@@ -52,11 +52,14 @@ class VariationCategory(models.Model):
         return self.name
 
 class Variation(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE,related_name='variation_product')
     variation_category = models.ForeignKey(VariationCategory, on_delete=models.CASCADE)
     variation_value = models.CharField(max_length=100)
     is_active = models.BooleanField(default=True)
     created_date = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['variation_category']  # Default ordering by variation_category
 
     def __str__(self):
         return f"{self.product.product_name}-{self.variation_category.name}-{self.variation_value}"
@@ -68,6 +71,7 @@ class Stock(models.Model):
     product_stock = models.IntegerField(default=0)
     price = models.IntegerField(default=0)
     search_key = models.CharField(max_length=255,null=True,blank=True)
+    is_active = models.BooleanField(default=False)
 
     def variation_info(self):
         variations = ", ".join([str(variation.variation_category.name)+":"+str(variation.variation_value)  for variation in self.variation_combo.all()])
@@ -75,8 +79,7 @@ class Stock(models.Model):
 
     def discounted_price(self,item_qty):
         try:
-            offer = BulkPurchaseOffer.objects.filter(product=self.product).first()
-            print(offer)
+            offer = BulkPurchaseOffer.objects.get(product=self.product)
             if item_qty>=offer.min_qty:
                 d_price = self.price*(1-offer.current_discount(item_qty)/100)
             else:
@@ -86,7 +89,9 @@ class Stock(models.Model):
         return d_price
 
     def __str__(self):
-        variations = ", ".join(str(variation.variation_category.name)+":"+str(variation.variation_value) for variation in self.variation_combo.all())
+        variations=""
+        for variation in self.variation_combo.all():
+            variations = variations+f"[{variation.variation_category}:{variation.variation_value}]"
         return f"{self.product.product_name} - {variations}"
     
 class ReviewsRatings(models.Model):
@@ -121,13 +126,27 @@ class BulkPurchaseOffer(models.Model):
     is_fixed = models.BooleanField(default=True)
 
     def current_discount(self,item_qty):
-        if not self.is_fixed:
-            c_discount = (item_qty//self.min_qty)*self.fixed_discount
+        c_discount=0
+        if item_qty>=self.min_qty:
+            if not self.is_fixed:
+                c_discount = (item_qty//self.min_qty)*self.fixed_discount
+            else:
+                c_discount = self.fixed_discount
+            return c_discount
         else:
-            c_discount = self.fixed_discount
-        return c_discount
+            return c_discount
+
 
     def __str__(self):
         return f"{self.offer_name} - {self.product.product_name}"
+    
+class Wishlist(models.Model):
+    user = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='wishlists')
+    product = models.ForeignKey(Product,on_delete=models.CASCADE,related_name='whishlist_product')
+    added_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.product.product_name} - {self.user.username}"
+
 
     

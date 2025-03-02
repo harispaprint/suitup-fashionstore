@@ -1,0 +1,107 @@
+{% extends "base_admin.html" %}
+{% load static %}
+{% block content %}
+
+<div class="main-content">
+    <div class="dashboard-header">
+        <h1 style="font-weight: bold">Inventory Management</h1>
+        
+    </div>
+    <table class="table">
+        <thead class="thead-dark">
+          <tr>
+            <th scope="col">Product_id</th>
+            <th scope="col">Product Name</th>
+            <th scope="col">Variations</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for product in products %}
+          
+          <tr>
+            <td>{{product.id}}</td>
+            <td>{{product.product_name}}</td>
+            <td>
+              {% include "myadmin/inventory/update_stock.html" %}
+            </td>
+          </tr>
+          {% endfor %}
+
+        </tbody>
+      </table>
+      
+</div>
+
+<script>
+  $(document).ready(function () {
+      $(document).on('click', '.view-details', function () {
+          event.preventDefault();  // Prevent default link action
+ 
+          var product_id = $(this).data('product-id');
+          var targetDiv = "#dynamic-content-" + product_id; // Target the correct modal content div
+
+          console.log("Fetching variations for Product ID:", product_id);
+
+          
+
+          let url = $(this).data("url");  // Get the reduce_cart URL
+
+          $.ajax({
+              url: url,  // No product_id in the URL
+              type: "GET",
+              data: { product_id: product_id },
+              dataType: "json",
+              success: function (response) {
+                  console.log("AJAX Success:", response);
+
+                  // Clear old data before appending new data
+                  $(targetDiv).empty();
+
+                  // Check if data is available
+                  console.log("Length:", response.combo_list_ids.length);
+                  if (response.combo_list_ids.length === 0) {
+                      $(targetDiv).append("<p>No variations found.</p>");
+                  } else {
+                    let tableHtml = `<table border="1">`;
+
+                    response.combo_list_ids.forEach(function (id, index) {
+                        if (index % 2 === 0) {
+                            tableHtml += `<tr>`; // Start a new row for every two items
+                        }
+                    
+                        tableHtml += `
+                            <td>
+                                <div>
+                                    <p><strong>Stock No:</strong> ${id}</p>
+                                    <p><strong>Details:</strong> ${response.combo_list_names[index]}</p>
+                                    <a href="/admin/add_product_stock/${id}/" class="btn-sm btn-primary">Add Stock</a>
+                                </div>
+                            </td>
+                        `;
+                    
+                        if (index % 2 === 1 || index === response.combo_list_ids.length - 1) {
+                            tableHtml += `</tr>`; // Close the row after two items
+                        }
+                    });
+                    
+                    tableHtml += `</table>`;
+                    
+                    $(targetDiv).html(tableHtml);
+                    
+                  }
+              },
+              error: function () {
+                  console.error("Failed to fetch variations.");
+                  $(targetDiv).html("<p class='text-danger'>Error loading data.</p>");
+              }
+          });
+      });
+  });
+</script>
+
+<script>
+  function confirmStockDelete() {
+      return confirm("Are you sure you want to delete this stock?");
+  }
+  </script>
+{% endblock content %}

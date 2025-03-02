@@ -71,7 +71,7 @@ class UserAddressForm(forms.ModelForm):
         model = UserAddresses
         fields = (
             'first_name', 'last_name', 'address_line_1', 'address_line_2', 
-            'city', 'state', 'country'
+            'city', 'state', 'country','pincode',
         )
 
     def __init__(self, *args, **kwargs):
@@ -115,6 +115,12 @@ class UserAddressForm(forms.ModelForm):
         if not country.isalpha():
             raise forms.ValidationError("Country name should contain only letters.")
         return country
+    
+    def clean_pincode(self):
+        pincode = self.cleaned_data.get('pincode')
+        if not pincode.isdigit():
+            raise forms.ValidationError("Pincode should contain only numbers.")
+        return pincode
 
     def clean(self):
         cleaned_data = super(UserAddressForm, self).clean()

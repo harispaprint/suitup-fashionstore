@@ -16,7 +16,6 @@ def activate_social_user(sender, request, user, **kwargs):
 
 @receiver(user_logged_in)
 def cartitem_to_user(sender, request, user, **kwargs):
-    print(f"17 {user}")
     cart_check(request)
     # try:
     #     cart = Cart.objects.order_by('-date_added').first()

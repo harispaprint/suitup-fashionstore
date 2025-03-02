@@ -1,0 +1,81 @@
+<table class="table table-striped table-bordered">
+    <thead class="table-primary">
+        <tr class="text-center">
+            <th class="col-2">Sale week</th>
+            <th class="col-3">Product Name</th>
+            <th class="col-2">Quantity Sold</th>
+            <th class="col-3">Price per Unit</th>
+            <th class="col-2">Total Sales</th>
+        </tr>
+    </thead>
+    <tbody id="sales-data" class="text-center">
+        {% for num, week_details in week.items %}
+        <tr>
+            <td>week-{{num}}</td>
+            
+            {% if week_details.weekly_total != 0 %}
+            <td>
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target=".bd-example-modal-lg">Large modal</button>
+
+                <div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                    <div
+                        class="table-responsive"
+                    >
+                        <table
+                            class="table table-primary"
+                        >
+                            <thead>
+                                <tr>
+                                    <th scope="col">Column 1</th>
+                                    <th scope="col">Column 2</th>
+                                    <th scope="col">Column 3</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="">
+                                    <td scope="row">R1C1</td>
+                                    <td>R1C2</td>
+                                    <td>R1C3</td>
+                                </tr>
+                                <tr class="">
+                                    <td scope="row">Item</td>
+                                    <td>Item</td>
+                                    <td>Item</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    </div>
+                </div>
+                </div>
+            </td>
+            <td></td>
+            <td></td>
+            {% else %}
+            <td colspan="3">No sales records</td>
+         
+            {% endif %}
+            <td>₹{{week_details.weekly_total}}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="2" class="text-center">No sales data available for this week.</td>
+        </tr>
+        {% endfor %}
+        <tr class="fw-bold text-success">
+            <td colspan="4">Total Sales</td>
+            <td>₹{{weekly_total}}</td>
+        </tr>
+        <tr class="fw-bold text-success">
+            <td colspan="4">Average sale per transaction</td>
+            <td>₹{{average_sale_per_transaction}}</td>
+        </tr>
+        <tr class="fw-bold text-success">
+            <td colspan="3">Best Selling Product</td>
+            <td colspan="3">{{best_selling_product}}</td>
+        </tr>
+    </tbody>
+</table>

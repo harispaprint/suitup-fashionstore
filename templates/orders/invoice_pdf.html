@@ -1,0 +1,132 @@
+{% load static %}
+    <head>
+       
+        <!-- Bootstrap4 files-->
+
+        <link href="{{bootstrap_url}}" rel="stylesheet" type="text/css"/>
+
+    </head>
+    <div class="container">
+    <div class="row invoice row-printable">
+        <div class="col-md-12">
+            <!-- col-lg-12 start here -->
+            <div class="panel panel-default plain" id="dash_0">
+                <!-- Start .panel -->
+                <div class="panel-body p30">
+                    <div class="row">
+                        <!-- Start .row -->
+                        <div class="col-lg-6">
+                            <!-- col-lg-6 start here -->
+                            <div class="invoice-logo">
+                                <img class="logo" src="{{ logo_url }}" alt="Invoice logo" style="max-height: 40px;">
+                            </div>
+                        </div>
+                        <!-- col-lg-6 end here -->
+                        <div class="col-lg-6">
+                            <!-- col-lg-6 start here -->
+                            <div class="invoice-from">
+                                <ul class="list-unstyled text-right">
+                                    <li><strong>Invoiced To</strong></li>
+                                    <li>{{order.order_address.full_name}}</li>
+                                    <li>{{order.order_address.full_address}}</li>
+                                    <li>{{order.order_address.city}}, {{order.order_address.state}}</li>
+                                    <li>{{order.order_address.country}}</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <!-- col-lg-6 end here -->
+                        <div class="col-lg-12">
+                            <!-- col-lg-12 start here -->
+                            <div class="invoice-details mt25">
+                                <div class="well">
+                                    <ul class="list-unstyled mb0">
+                                        <li><strong>Order</strong> {{order.order_number}}</li>
+                                        {% if order.payment_method == 'pay_now' %}
+                                        <li><strong>Transaction ID</strong> {{order.payment.razorpay_payment_id}}</li>
+                                        {% else%}
+                                        <li><strong>Payment method : </strong> {{order.payment_mode}}</li>
+                                        {% endif %}
+                                        <li><strong>Order Date:</strong> {{order.created_at}}</li>
+                                        <li><strong>Status:</strong> {{order.status}}</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="invoice-items">
+                                <div class="table-responsive" style="overflow: hidden; outline: none;" tabindex="0">
+                                    <table class="table table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th class="per70 text-center">Products</th>
+                                                <th class="per5 text-center">Qty</th>
+                                                <th class="per25 text-center">Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                          {% for item in ordered_products %}
+                                            <tr>
+                                                <td>{{item.product.product_name}}
+                                                  <p class="text-muted small">
+                                          					{% if item.stock.variation_combo.all %}
+                                          						{% for i in item.stock.variation_combo.all %}
+                                          							{{ i.variation_category | capfirst }} : {{ i.variation_value | capfirst }} <br>
+                                          						{% endfor %}
+                                          					{% endif %}
+                                          				</p>
+                                                </td>
+                                                <td class="text-center">{{item.quantity}}</td>
+                                                <td class="text-center">₹{{item.p_discount_price}} </td>
+                                            </tr>
+                                          {% endfor %}
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <th colspan="2" class="text-right">Sub Total:</th>
+                                                <th class="text-center">₹{{order.sub_order_total}} </th>
+                                            </tr>
+                                            <tr>
+                                                <th colspan="2" class="text-right">Discount:</th>
+                                                <th class="text-center">{{order.coupon.coupon_discount}}% </th>
+                                            </tr>
+                                            <tr>
+                                                <th colspan="2" class="text-right">Net Total:</th>
+                                                <th class="text-center">₹{{order.net_order_total}} </th>
+                                            </tr>
+                                            <tr>
+                                                <th colspan="2" class="text-right">Tax:</th>
+                                                <th class="text-center">₹{{order.tax}} </th>
+                                            </tr>
+                              
+                                            <tr>
+                                                <th colspan="2" class="text-right">Grand Total:</th>
+                                                <th class="text-center">₹{{order.grand_order_total}} </th>
+                                            </tr>
+                                            {% if order.wallet_amount_used > 0 %}
+                                            <tr>
+                                                <th colspan="2" class="text-right">Wallet Amound used:</th>
+                                                <th class="text-center">- ₹{{order.wallet_amount_used}} </th>
+                                            </tr>
+                                            {% endif %}
+                                            <tr>
+                                                <th colspan="2" class="text-right">Payable Amount:</th>
+                                                <th class="text-center">₹{{order.payable_amount}} </th>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="invoice-footer mt25">
+                                <p class="text-center">Thank you for shopping with us!</p>
+                            </div>
+                        </div>
+                        <!-- col-lg-12 end here -->
+                    </div>
+                    <!-- End .row -->
+                </div>
+            </div>
+            <!-- End .panel -->
+        </div>
+        <!-- col-lg-12 end here -->
+    </div>
+</div>
+

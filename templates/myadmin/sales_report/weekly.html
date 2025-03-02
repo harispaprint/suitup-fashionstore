@@ -1,0 +1,44 @@
+<table class="table table-striped table-bordered">
+    <thead class="table-primary">
+        <tr class="text-center">
+            <th class="col-2">Sale Date</th>
+            <th class="col-3">Product Name</th>
+            <th class="col-2">Quantity Sold</th>
+            <th class="col-3">Price per Unit</th>
+            <th class="col-2">Total Sales</th>
+        </tr>
+    </thead>
+    <tbody id="sales-data" class="text-center">
+        {% for date, total in daily_total.items %}
+        <tr>
+            <td>{{date}} - {{ date|date:"D" }}</td>
+            
+            {% if total != 0 %}
+            <td></td>
+            <td></td>
+            <td></td>
+            {% else %}
+            <td colspan="3">No sales records</td>
+         
+            {% endif %}
+            <td>₹{{total}}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="2" class="text-center">No sales data available for this week.</td>
+        </tr>
+        {% endfor %}
+        <tr class="fw-bold text-success">
+            <td colspan="4">Total Sales</td>
+            <td>₹{{weekly_total}}</td>
+        </tr>
+        <tr class="fw-bold text-success">
+            <td colspan="4">Average sale per transaction</td>
+            <td>₹{{average_sale_per_transaction}}</td>
+        </tr>
+        <tr class="fw-bold text-success">
+            <td colspan="3">Best Selling Product</td>
+            <td colspan="3">{{best_selling_product}}</td>
+        </tr>
+    </tbody>
+</table>

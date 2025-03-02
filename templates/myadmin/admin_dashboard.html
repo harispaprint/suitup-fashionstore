@@ -1,0 +1,188 @@
+{% extends "base_admin.html" %}
+{% load static %}
+{% block content %}
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+
+<script src="https://www.gstatic.com/charts/loader.js"></script>
+
+<div class="container">
+    <div class="row">
+        <!-- First Chart -->
+        <div class="card m-3 col-md-6 p-0">
+            <div class="card-body">
+                <canvas id="myChart1" class="w-100"></canvas>
+            </div>
+        </div>
+        <!-- Second Chart -->
+        <div class="card m-3 col-md-6 p-0">
+            <div class="card-body">
+                <canvas id="myChart2" class="w-100"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <!-- First Chart -->
+        <div class="card m-3 col-md-6 p-0">
+            <div class="card-body">
+                <canvas id="myChart3" class="w-100"></canvas>
+            </div>
+        </div>
+        <!-- Second Chart -->
+        <div class="card m-3 col-md-6 p-0">
+            <div class="card-body">
+                <canvas id="myChart4" class="w-100"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- First Table -->
+        <div class="card m-3 col-md-6 p-0">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <p><strong>Best Selling Product</strong></p>
+                    <table class="table table-bordered table-striped table-hover table-success">
+                        <thead class="table-success">
+                            <tr>
+                              <th>Prodcut</th>
+                              <th>Qty Sold</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in best_selling %}
+                                <tr class="table-warning text-dark">
+                                    <td>{{product}}</td>
+                                    <td>{{product.sales_count}}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- Second Table -->
+        <div class="card m-3 col-md-6 p-0">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <p><strong>Best Selling Category</strong></p>
+                    <table class="table table-bordered table-striped table-hover table-info">
+                        <thead class="table-danger">
+                            <tr>
+                                <th>Prodcut</th>
+                                <th>Qty Sold</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                          {% for category in best_selling_cat %}  
+                          <tr class="bg-warning text-dark">
+                                <td>{{category}}</td>
+                                <td>{{category.sales_count}}</td>
+                            </tr>
+                          {% endfor %}
+                            
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+    const xValues = {{ xValues|safe }}; // Example: ['Italy', 'France', 'Spain']
+    const yValues = {{ yValues|safe }}; // Example: [55, 49, 44]
+    const xValues_week = {{ xValues_week|safe }}; // Example: ['Italy', 'France', 'Spain']
+    const yValues_week = {{ yValues_week|safe }}; // Example: [55, 49, 44]
+    const xValues_month = {{ xValues_month|safe }}; // Example: ['Italy', 'France', 'Spain']
+    const yValues_month = {{ yValues_month|safe }}; // Example: [55, 49, 44]
+    const xValues_year = {{ xValues_year|safe }}; // Example: ['Italy', 'France', 'Spain']
+    const yValues_year = {{ yValues_year|safe }}; // Example: [55, 49, 44]
+
+
+const barColors = [
+  "#b91d47",
+  "#00aba9",
+  "#2b5797",
+  "#e8c3b9",
+  "#1e7145"
+];
+
+new Chart("myChart1", {
+  type: "pie",
+  data: {
+    labels: xValues,
+    datasets: [{
+      backgroundColor: barColors,
+      data: yValues
+    }]
+  },
+  options: {
+    title: {
+      display: true,
+      text: "Daily Sales"
+    }
+  }
+});
+
+new Chart("myChart2", {
+    type: "pie",
+    data: {
+      labels: xValues_week,
+      datasets: [{
+        backgroundColor: barColors,
+        data: yValues_week
+      }]
+    },
+    options: {
+      title: {
+        display: true,
+        text: "Weekly Sales"
+      }
+    }
+  });
+
+  new Chart("myChart3", {
+    type: "pie",
+    data: {
+      labels: xValues_month,
+      datasets: [{
+        backgroundColor: barColors,
+        data: yValues_month
+      }]
+    },
+    options: {
+      title: {
+        display: true,
+        text: "Monthly Sales"
+      }
+    }
+  });
+  new Chart("myChart4", {
+    type: "pie",
+    data: {
+      labels: xValues_year,
+      datasets: [{
+        backgroundColor: barColors,
+        data: yValues_year
+      }]
+    },
+    options: {
+      title: {
+        display: true,
+        text: "Yearly Sales"
+      }
+    }
+  });
+ 
+  
+</script>
+
+
+
+
+
+{% endblock content %}

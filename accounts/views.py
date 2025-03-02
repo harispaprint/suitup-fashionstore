@@ -20,8 +20,9 @@ from django.core.mail import EmailMessage
 
 from carts.utils import _cart_id, cart_check
 from carts.models import Cart,CartItem
-from orders.models import Order, OrderProduct
+from orders.models import Order, OrderProduct, Wallet, WalletTransaction
 import requests
+from django.db.models import Count,Q
 
 
 def register(request):
@@ -161,7 +162,7 @@ def login(request):
         else:
             messages.error(request, 'Invalid login credentials')
             return redirect('login')
-    return render(request, 'accounts/login.html')
+    return render(request, 'accounts/login.html', {'show_modal': True})
 
 
 @login_required(login_url = 'login')
@@ -218,38 +219,12 @@ def edit_profile(request):
         }
     return render(request, 'accounts/edit_profile.html', context)
 
-@login_required(login_url='login')
-def my_orders(request):
-    orders = Order.objects.filter(user=request.user, is_ordered=True).order_by('-created_at')
-    context = {
-        'orders': orders,
-    }
-    return render(request, 'accounts/my_orders.html', context)
+
 
 @login_required(login_url='login')
-def order_detail(request, order_id):
-    
-    order_detail = OrderProduct.objects.filter(order__order_number=order_id)
-    order = Order.objects.get(order_number=order_id)
-    subtotal = 0
-    current_user = request.user
-    order_user = order.user
-    print(f"current_user : {current_user}")
-    print(f"order_user : {order_user}")
-    if request.user == order.user or request.user.is_admin:
-        for i in order_detail:
-            subtotal += i.product_price * i.quantity
-
-        context = {
-            'order_detail': order_detail,
-            'order': order,
-            'subtotal': subtotal,
-        }
-        return render(request, 'accounts/order_detail.html', context)
-    else:
-        return redirect('store')
-
 def saved_addresses(request):
+    current_url = request.get_full_path()
+    request.session['current_url'] = current_url
     current_user = request.user
     saved_addresses = UserAddresses.objects.filter(user=current_user).order_by('-is_default')
     context = {
@@ -279,8 +254,9 @@ def add_user_address(request):
             address_form.save()
             messages.success(request, 'New address added succefully.')
             # Dynamically determine the redirect target
-            next_page = request.GET.get('next', 'saved_addresses')
-            return redirect(next_page)
+            # next_page = request.GET.get('next', 'saved_addresses')
+            previous_url = request.session.get('current_url')
+            return redirect(previous_url)
     else:
         address_form = UserAddressForm()
     form_heading="Add Address"
@@ -298,8 +274,9 @@ def edit_user_address(request,address_id):
         if address_form.is_valid():
             address_form.save()
             messages.success(request, 'Your address has been updated.')
-            next_page = request.GET.get('next', 'saved_addresses')
-            return redirect(next_page)
+            # next_page = request.GET.get('next', 'saved_addresses')
+            previous_url = request.session.get('current_url')
+            return redirect(previous_url)
     else:
         address_form = UserAddressForm(instance=useraddress)
     form_heading="Edit Address"
@@ -310,7 +287,6 @@ def edit_user_address(request,address_id):
     return render(request, 'accounts/user_address_form.html', context)
 
 @login_required(login_url='login')
-
 def delete_user_address(request,address_id):
     url = request.META.get('HTTP_REFERER')
     useraddress = UserAddresses.objects.get(user=request.user,id=address_id)
@@ -319,3 +295,26 @@ def delete_user_address(request,address_id):
 
 def email_view(request):
     return redirect('user_dashboard')
+
+@login_required(login_url='login')
+def wallet(request,status=None):
+    wallet=None
+    try:        
+        wallet = Wallet.objects.get(user=request.user)
+    except Wallet.DoesNotExist:
+        wallet = Wallet.objects.create(user=request.user)
+   
+    if status == 'all':
+        wallet_transactions = WalletTransaction.objects.filter(wallet=wallet)
+    elif status == 'credits':
+        filter_transaction = Q(transaction_type__iexact='refund') | Q(transaction_type__iexact='add_cash')
+        wallet_transactions = WalletTransaction.objects.filter(filter_transaction,wallet=wallet)
+    elif status.lower() == 'debits':
+        filter_transaction = Q(transaction_type__iexact='purchase') | Q(transaction_type__iexact='transfer')
+        wallet_transactions = WalletTransaction.objects.filter(filter_transaction,wallet=wallet)
+        
+    context = {
+        'wallet': wallet,
+        'wallet_transactions': wallet_transactions,
+    }
+    return render(request,'accounts/wallet.html',context)

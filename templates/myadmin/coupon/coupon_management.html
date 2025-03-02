@@ -1,0 +1,41 @@
+{% extends "base_admin.html" %}
+{% load static %}
+
+{% block content %}
+
+<div class="main-content">
+    <div class="dashboard-header">
+        <h1 style="font-weight: bold">Coupon Management</h1>
+          {% include "myadmin/coupon/add_coupon_form_modal.html" %}
+    </div>
+    <table class="table">
+        <thead class="thead-dark">
+          <tr>
+            <th scope="col">Coupon Code</th>
+            <th scope="col">Coupon Description</th>
+            <th scope="col">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for coupon in coupons %}
+          <tr>
+            <td>{{ coupon.coupon_code }}</td>
+            <td>{{ coupon.coupon_description }}</td>
+          
+            <td>
+              {% include "myadmin/coupon/edit_coupon_modal.html" %}  
+            </td>
+          </tr>
+          {% endfor %}
+
+        </tbody>
+      </table>
+</div>
+
+<script>
+  function confirmCouponDelete() {
+      return confirm("Are you sure you want to delete this Coupon?");
+  }
+  </script>
+
+{% endblock content %}

@@ -11,7 +11,16 @@
 	<br>
 	<div class="text-center">
 		<a href="{% url 'store' %}" class="btn btn-success">Shop more</a>
+        <br><br>
+        <a href="{% url "generate_invoice_pdf" order.id %}" class="btn btn-info">Print</a>
+        {% comment %} <form action="{% url "generate_invoice_pdf" %}" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="order" value="{{order.id}}">
+            <input type="hidden" name="ordered_products" value="{{ordered_products}}">
+            <button class="btn btn-info" type="submit">Print</button>
+        </form> {% endcomment %}
 	</div>
+    
 </div>
 
 <div class="container" style="margin: 0 auto;width: 50%;padding: 50px;background: #f1f1f1;margin-top: 50px;margin-bottom: 50px;">
@@ -47,7 +56,11 @@
                                 <div class="well">
                                     <ul class="list-unstyled mb0">
                                         <li><strong>Order</strong> {{order.order_number}}</li>
+                                        {% if order.payment_method == 'pay_now' %}
                                         <li><strong>Transaction ID</strong> {{order.payment.razorpay_payment_id}}</li>
+                                        {% else%}
+                                        <li><strong>Payment method : </strong> {{order.payment_mode}}</li>
+                                        {% endif %}
                                         <li><strong>Order Date:</strong> {{order.created_at}}</li>
                                         <li><strong>Status:</strong> {{order.status}}</li>
                                     </ul>
@@ -77,23 +90,41 @@
                                           				</p>
                                                 </td>
                                                 <td class="text-center">{{item.quantity}}</td>
-                                                <td class="text-center">${{item.product_price}} USD</td>
+                                                <td class="text-center">₹{{item.p_discount_price}} </td>
                                             </tr>
                                           {% endfor %}
                                         </tbody>
                                         <tfoot>
                                             <tr>
                                                 <th colspan="2" class="text-right">Sub Total:</th>
-                                                <th class="text-center">${{subtotal}} USD</th>
+                                                <th class="text-center">₹{{order.sub_order_total}} </th>
+                                            </tr>
+                                            <tr>
+                                                <th colspan="2" class="text-right">Discount({{order.coupon.coupon_discount}}%):</th>
+                                                <th class="text-center">₹{{discount_amount}}</th>
+                                            </tr>
+                                            <tr>
+                                                <th colspan="2" class="text-right">Net Total:</th>
+                                                <th class="text-center">₹{{order.net_order_total}} </th>
                                             </tr>
                                             <tr>
                                                 <th colspan="2" class="text-right">Tax:</th>
-                                                <th class="text-center">${{order.tax}} USD</th>
+                                                <th class="text-center">₹{{order.tax}} </th>
                                             </tr>
-
+                                          
                                             <tr>
                                                 <th colspan="2" class="text-right">Grand Total:</th>
-                                                <th class="text-center">${{order.order_total}} USD</th>
+                                                <th class="text-center">₹{{order.grand_order_total}} </th>
+                                            </tr>
+                                            {% if order.wallet_amount_used > 0 %}
+                                            <tr>
+                                                <th colspan="2" class="text-right">Wallet Amound used:</th>
+                                                <th class="text-center">- ₹{{order.wallet_amount_used}} </th>
+                                            </tr>
+                                            {% endif %}
+                                            <tr>
+                                                <th colspan="2" class="text-right">Payable Amount:</th>
+                                                <th class="text-center">₹{{order.payable_amount}} </th>
                                             </tr>
                                         </tfoot>
                                     </table>

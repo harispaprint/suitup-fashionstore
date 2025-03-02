@@ -1,6 +1,8 @@
 from django import forms
-from .models import Product,ProductImage, Stock,Variation, VariationCategory,ReviewsRatings
+from .models import Coupon, Product,ProductImage, Stock,Variation, VariationCategory,ReviewsRatings
 from category.models import Category
+from django import forms
+from .models import Stock, Product, Variation
 
 class AddProductForm(forms.ModelForm):
     category = forms.ModelChoiceField(
@@ -51,39 +53,27 @@ class ReviewForm(forms.ModelForm):
         fields = ['review_subject','review_body','rating']
 
 
-# class StockForm(forms.ModelForm):
-#     class Meta:
-#         model = Stock
-#         fields = ['product', 'variation_combo', 'product_stock', 'price']
-#         widgets = {
-#             'variation_combo': forms.CheckboxSelectMultiple(),
-#             'product_stock': forms.NumberInput(attrs={'min': 0}),
-#             'price': forms.NumberInput(attrs={'min': 0}),
-#         }
+class CouponForm(forms.ModelForm):
 
-#     def __init__(self, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
-#         self.fields['product'].widget.attrs.update({'class': 'form-control'})
-#         self.fields['product_stock'].widget.attrs.update({'class': 'form-control'})
-#         self.fields['price'].widget.attrs.update({'class': 'form-control'})
-
-from django import forms
-from .models import Stock, Product, Variation
-
-class StockForm(forms.ModelForm):
     class Meta:
-        model = Stock
-        fields = ['product', 'variation_combo', 'product_stock', 'price']
+        model = Coupon
+        fields = ['coupon_code','coupon_description','coupon_discount']
+    
+        widgets = {
+            'coupon_code': forms.TextInput(attrs={'class': 'form-control'}),
+            'coupon_description': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
+            'coupon_discount': forms.NumberInput(attrs={'class': 'form-control'}),
+        }
 
-    def __init__(self, *args, **kwargs):
-        super(StockForm, self).__init__(*args, **kwargs)
-        self.fields['variation_combo'].queryset = Variation.objects.none()
-        if 'product' in self.data:
-            try:
-                product_id = int(self.data.get('product'))
-                self.fields['variation_combo'].queryset = Variation.objects.filter(product_id=product_id)
-            except (ValueError, TypeError):
-                pass  # invalid input; return empty queryset
-        elif self.instance.pk:
-            self.fields['variation_combo'].queryset = self.instance.product.variation_set.all()
+    def clean_coupon_code(self):
+        coupon_codes_check = set(code.lower() for code in Coupon.objects.values_list('coupon_code',flat=True))
+
+        coupon_code = self.cleaned_data.get('coupon_code')
+
+        if coupon_code.lower() in coupon_codes_check:
+            raise forms.ValidationError(f"The coupon code {coupon_code} already exists")
+        return coupon_code
+
+
+
 
