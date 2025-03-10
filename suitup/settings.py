@@ -9,7 +9,6 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-
 import os
 from pathlib import Path
 from dotenv import load_dotenv
@@ -19,7 +18,7 @@ load_dotenv()
 
 # Use environment variables
 SECRET_KEY = os.getenv('SECRET_KEY')
-DEBUG = os.getenv('DEBUG') == 'True'
+DEBUG = os.getenv("DEBUG", "False") == "True"
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,8 +26,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
-ALLOWED_HOSTS = []
+# ALLOWED_HOSTS = ['django-suitup3-env.eba-eg7dz4hm.us-west-2.elasticbeanstalk.com']
 
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
     'allauth.socialaccount.providers.github',
+    'storages',
 ]
 
 AUTHENTICATION_BACKENDS = [
@@ -91,15 +92,13 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'razorpay_payment.wsgi.application'
+# WSGI_APPLICATION = 'razorpay_payment.wsgi.application'
 #Social login settings
 
 try:
     from .local_settings import *
 except ImportError:
     pass  # If local_settings.py doesn't exist, simply ignore the error
-
-
 
 SOCIALACCOUNT_LOGIN_ON_GET=True
 
@@ -130,6 +129,8 @@ DATABASES = {
         'PORT': os.getenv('DB_PORT', '5432'),
     }
 }
+
+
 
 
 # Password validation
@@ -165,21 +166,56 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'static'
-STATICFILES_DIRS = [
-    'suitup/static',
-]
+
+if DEBUG:
+    STATIC_URL = '/static/'
+    STATIC_ROOT = BASE_DIR / 'static'
+
+    STATICFILES_DIRS = [
+        BASE_DIR / 'suitup/static',
+    ]
+
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = BASE_DIR / 'media'
+else:
+    # AWS S3 Bucket Configurations
+    AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+    AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+    AWS_STORAGE_BUCKET_NAME = 'suitup1-bucket'
+    AWS_S3_SIGNATURE_NAME = 's3v4'
+    AWS_S3_REGION_NAME = "us-west-2"  # e.g., 'us-east-1'
+
+    # AWS S3 static and media file settings
+    AWS_S3_FILE_OVERWRITE = False
+    AWS_S3_VERIFY = True
+    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+    AWS_S3_OBJECT_PARAMETERS = {
+        'CacheControl': 'max-age=86400',
+    }
+    AWS_DEFAULT_ACL = 'public-read'
+    AWS_LOCATION = 'static'
+
+    STATICFILES_DIRS = [
+        'suitup/static',
+    ]
+    STATIC_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com/'
+
+    STORAGES = {
+        #media Files
+        "default": {
+            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+        },
+        # CSS and JS file management
+        "staticfiles": {
+            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+        },
+    }
+
 
 # Add the domain for the production or local server
 from django.contrib.sites.shortcuts import get_current_site
 
-STATIC_URL_PREFIX = 'http://127.0.0.1:8000'  # Adjust for production environment
-
-
-
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+# STATIC_URL_PREFIX = 'http://127.0.0.1:8000'  # Adjust for production environment
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -192,10 +228,7 @@ MESSAGE_TAGS = {
     messages.ERROR: 'danger',
 }
 
-
-
 WKHTMLTOPDF_CMD = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
-
 
 # Fetch Razorpay credentials
 RAZORPAY_KEY_ID = os.getenv('RAZORPAY_KEY_ID')

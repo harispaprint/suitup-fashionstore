@@ -6,8 +6,8 @@ from orders.models import Order
 from datetime import timedelta
 from django.db.models import Sum, F, Q
 from django.utils.timezone import now
-import pandas as pd
-from reportlab.pdfgen import canvas
+# import pandas as pd
+# from reportlab.pdfgen import canvas
 
 
 def admin_required(view_func):

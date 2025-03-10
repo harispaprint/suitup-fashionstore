@@ -268,7 +268,7 @@ def checkout(request,cart_id,sub_total=0,quantity=0,coupon_discount=0,cart_items
             quantity += cart_item.quantity
         net_total = round(sub_total*(1-coupon_discount/100),2)
         tax = round(net_total*(2/100),2)
-        grand_total = net_total + tax
+        grand_total = round(net_total + tax)
         
             
     except Cart.DoesNotExist:

@@ -17,12 +17,12 @@ from django.utils.text import slugify
 from .utils import admin_required, generate_excel_report, generate_pdf_report, get_filtered_orders
 from django.http import JsonResponse, HttpResponse
 from django.template.loader import render_to_string
-from openpyxl import Workbook
+# from openpyxl import Workbook
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Sum, F, Exists, OuterRef
 from django.utils.timezone import now
 from weasyprint import HTML
-import pdfkit
+# import pdfkit
 from django.templatetags.static import static
 from django.db.models import Count
 from functools import reduce
@@ -595,7 +595,7 @@ def generate_pdf_from_template(request,sale_date):
     # Render the HTML template
     sale_report = dict(request.GET)
     sale_report = daily_sales_report(request,sale_date)
-    sale_report['logo_url']=request.build_absolute_uri(static('images/suitup_logo.png'))
+    # sale_report['logo_url']=request.build_absolute_uri(static('images/suitup_logo.png'))
     
     html_content = render_to_string('myadmin/sales_report/sales_report_export.html',sale_report)
 

@@ -5,11 +5,11 @@ from datetime import date, datetime, time, timedelta
 from django.http import HttpResponse
 from store.models import Product
 from orders.models import Order,OrderProduct
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 from io import BytesIO
 from django.http import HttpResponse
 from django.template.loader import render_to_string
-from weasyprint import HTML
+# from weasyprint import HTML
 from django.conf import settings
 import os
 
