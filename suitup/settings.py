@@ -241,3 +241,25 @@ EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))  # Convert to int
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'  # Convert to boolean
+
+
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'APP': {
+            'client_id': os.getenv('CLIENT_ID_GOOGLE'),
+            'secret': os.getenv('SECRET_KEY_GOOGLE'),
+          
+        },
+        'SCOPE': ['profile','email',],
+         'AUTH_PARAMS': {'access_type': 'online'},
+        'METHOD': 'oauth2',
+        'VERIFIED_EMAIL': True,
+    },
+    'github': {
+        'APP': {
+            'client_id': os.getenv('CLIENT_ID_GITHUB'),
+            'secret': os.getenv('SECRET_KEY_GITHUB'),
+        }
+    }
+   
+}
