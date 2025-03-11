@@ -26,8 +26,13 @@ deployment = True
 
 # Use environment variables
 if deployment:
-    SECRET_KEY = get_parameter('/suitup/production/SECRET_KEY')
     DEBUG = False
+    try:
+        SECRET_KEY = get_parameter('/suitup/production/SECRET_KEY')
+    except:
+        # For local development only
+        SECRET_KEY = 'django-insecure-development-key-change-in-production'
+    
 else:
     SECRET_KEY = os.getenv('SECRET_KEY')
     DEBUG = True
