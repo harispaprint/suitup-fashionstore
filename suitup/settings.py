@@ -22,7 +22,7 @@ def get_parameter(name):
 # Load .env file
 load_dotenv()
 
-deployment = True
+deployment = False
 
 # Use environment variables
 if deployment:
