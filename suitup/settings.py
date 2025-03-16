@@ -12,30 +12,14 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 import os
 from pathlib import Path
 from dotenv import load_dotenv
-import boto3
-
-def get_parameter(name):
-    ssm = boto3.client('ssm', region_name='us-west-2')  # e.g., 'us-east-1'
-    response = ssm.get_parameter(Name=name, WithDecryption=True)
-    return response['Parameter']['Value']
 
 # Load .env file
 load_dotenv()
 
-deployment = False
-
 # Use environment variables
-if deployment:
-    DEBUG = False
-    try:
-        SECRET_KEY = get_parameter('/suitup/production/SECRET_KEY')
-    except:
-        # For local development only
-        SECRET_KEY = 'django-insecure-development-key-change-in-production'
-    
-else:
-    SECRET_KEY = os.getenv('SECRET_KEY')
-    DEBUG = True
+
+SECRET_KEY = os.getenv('SECRET_KEY')
+DEBUG = True
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -45,7 +29,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # ALLOWED_HOSTS = ['django-suitup3-env.eba-eg7dz4hm.us-west-2.elasticbeanstalk.com']
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = []
 
 # Application definition
 
@@ -67,7 +51,6 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
     'allauth.socialaccount.providers.github',
-    'storages',
 ]
 
 AUTHENTICATION_BACKENDS = [
@@ -120,49 +103,26 @@ WSGI_APPLICATION = 'suitup.wsgi.application'
 
 AUTH_USER_MODEL = 'accounts.Account'
 
-if deployment:
-    SOCIALACCOUNT_PROVIDERS = {
-        'google': {
-            'APP': {
-                'client_id': get_parameter('/suitup/production/CLIENT_ID_GOOGLE'),
-                'secret': get_parameter('/suitup/production/SECRET_KEY_GOOGLE'),
-            
-            },
-            'SCOPE': ['profile','email',],
-            'AUTH_PARAMS': {'access_type': 'online'},
-            'METHOD': 'oauth2',
-            'VERIFIED_EMAIL': True,
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'APP': {
+            'client_id': os.getenv('CLIENT_ID_GOOGLE'),
+            'secret': os.getenv('SECRET_KEY_GOOGLE'),
+        
         },
-        'github': {
-            'APP': {
-                'client_id': get_parameter('/suitup/production/CLIENT_ID_GITHUB'),
-                'secret': get_parameter('/suitup/production/SECRET_KEY_GITHUB'),
-            }
+        'SCOPE': ['profile','email',],
+        'AUTH_PARAMS': {'access_type': 'online'},
+        'METHOD': 'oauth2',
+        'VERIFIED_EMAIL': True,
+    },
+    'github': {
+        'APP': {
+            'client_id': os.getenv('CLIENT_ID_GITHUB'),
+            'secret': os.getenv('SECRET_KEY_GITHUB'),
         }
-    
-    }
-else:
-    SOCIALACCOUNT_PROVIDERS = {
-        'google': {
-            'APP': {
-                'client_id': os.getenv('CLIENT_ID_GOOGLE'),
-                'secret': os.getenv('SECRET_KEY_GOOGLE'),
-            
-            },
-            'SCOPE': ['profile','email',],
-            'AUTH_PARAMS': {'access_type': 'online'},
-            'METHOD': 'oauth2',
-            'VERIFIED_EMAIL': True,
-        },
-        'github': {
-            'APP': {
-                'client_id': os.getenv('CLIENT_ID_GITHUB'),
-                'secret': os.getenv('SECRET_KEY_GITHUB'),
-            }
-        }
-    
     }
 
+}
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
@@ -174,28 +134,17 @@ else:
 #     }
 # }
 
-if deployment:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': get_parameter('/suitup/production/DB_NAME'),
-            'USER': get_parameter('/suitup/production/DB_USER'),
-            'PASSWORD': get_parameter('/suitup/production/DB_PASSWORD'),
-            'HOST': get_parameter('/suitup/production/DB_HOST'),
-            'PORT': get_parameter('/suitup/production/DB_PORT'),
-        }
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': 'localhost',
+        'PORT': 5432,
     }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.getenv('DB_NAME'),
-            'USER': os.getenv('DB_USER'),
-            'PASSWORD': os.getenv('DB_PASSWORD'),
-            'HOST': os.getenv('DB_HOST'),
-            'PORT': os.getenv('DB_PORT', '5432'),
-        }
-    }
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -226,54 +175,18 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'static'
 
-if deployment:
-    AWS_ACCESS_KEY_ID = get_parameter('/suitup/production/AWS_ACCESS_KEY_ID')
-    AWS_SECRET_ACCESS_KEY = get_parameter('/suitup/production/AWS_SECRET_ACCESS_KEY')
-    AWS_STORAGE_BUCKET_NAME = 'suitup1-bucket'
-    AWS_S3_SIGNATURE_NAME = 's3v4'
-    AWS_S3_REGION_NAME = "us-west-2"  # e.g., 'us-east-1'
+STATICFILES_DIRS = [
+    BASE_DIR / 'suitup/static',
+]
 
-    # AWS S3 static and media file settings
-    AWS_S3_FILE_OVERWRITE = False
-    AWS_S3_VERIFY = True
-    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
-    AWS_S3_OBJECT_PARAMETERS = {
-        'CacheControl': 'max-age=86400',
-    }
-    AWS_DEFAULT_ACL = 'public-read'
-    AWS_LOCATION = 'static'
-
-    STATICFILES_DIRS = [
-        'suitup/static',
-    ]
-    STATIC_ROOT = BASE_DIR / "staticfiles"
-    STATIC_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com/'
-
-    STORAGES = {
-        #media Files
-        "default": {
-            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
-        },
-        # CSS and JS file management
-        "staticfiles": {
-            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
-        },
-    }
-else:
-    STATIC_URL = '/static/'
-    STATIC_ROOT = BASE_DIR / 'static'
-
-    STATICFILES_DIRS = [
-        BASE_DIR / 'suitup/static',
-    ]
-
-    MEDIA_URL = '/media/'
-    MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 
 # Add the domain for the production or local server
@@ -294,27 +207,15 @@ MESSAGE_TAGS = {
 
 WKHTMLTOPDF_CMD = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
 
-# Fetch Razorpay credentials
-if deployment:
-    RAZORPAY_KEY_ID = get_parameter('/suitup/production/RAZORPAY_KEY_ID')
-    RAZORPAY_KEY_SECRET = get_parameter('/suitup/production/RAZORPAY_KEY_SECRET')
-else:
-    RAZORPAY_KEY_ID = os.getenv('RAZORPAY_KEY_ID')
-    RAZORPAY_KEY_SECRET = os.getenv('RAZORPAY_KEY_SECRET')
+
+RAZORPAY_KEY_ID = os.getenv('RAZORPAY_KEY_ID')
+RAZORPAY_KEY_SECRET = os.getenv('RAZORPAY_KEY_SECRET')
 
 # Email Configuration
-if deployment:
-    EMAIL_BACKEND = get_parameter('/suitup/production/EMAIL_BACKEND')
-    EMAIL_HOST = get_parameter('/suitup/production/EMAIL_HOST')
-    EMAIL_PORT = int(get_parameter('/suitup/production/EMAIL_PORT'))  # Convert to int
-    EMAIL_HOST_USER = get_parameter('/suitup/production/EMAIL_HOST_USER')
-    EMAIL_HOST_PASSWORD = get_parameter('/suitup/production/EMAIL_HOST_PASSWORD')
-    EMAIL_USE_TLS = get_parameter('/suitup/production/EMAIL_USE_TLS') == 'True' # Convert to boolean
-else:
-    EMAIL_BACKEND = os.getenv('EMAIL_BACKEND')
-    EMAIL_HOST = os.getenv('EMAIL_HOST')
-    EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))  # Convert to int
-    EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
-    EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
-    EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'  # Convert to boolean
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+EMAIL_USE_TLS = True
 
