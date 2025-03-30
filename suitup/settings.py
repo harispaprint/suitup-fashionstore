@@ -29,7 +29,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # ALLOWED_HOSTS = ['django-suitup3-env.eba-eg7dz4hm.us-west-2.elasticbeanstalk.com']
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['3.84.137.172']
 
 # Application definition
 
