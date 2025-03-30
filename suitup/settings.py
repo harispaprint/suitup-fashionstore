@@ -138,9 +138,9 @@ SOCIALACCOUNT_PROVIDERS = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME'),
-        'USER': os.getenv('DB_USER'),
-        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'NAME': 'suitup',
+        'USER': 'postgres',
+        'PASSWORD': 'kmea7034',
         'HOST': 'localhost',
         'PORT': 5432,
     }
