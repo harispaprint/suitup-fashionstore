@@ -141,7 +141,7 @@ DATABASES = {
         'NAME': 'suitup',
         'USER': 'postgres',
         'PASSWORD': 'kmea7034',
-        'HOST': 'localhost',
+        'HOST': '127.0.0.1',
         'PORT': 5432,
     }
 }
